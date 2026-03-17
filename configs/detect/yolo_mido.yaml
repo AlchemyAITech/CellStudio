@@ -1,0 +1,19 @@
+task: detection
+model:
+  backend: yolo
+  architecture: yolov8n
+  pretrained: true
+  in_channels: 4
+
+data:
+  data_dir: datasets/detection/MIDO
+  batch_size: 4
+  num_workers: 4
+
+training:
+  epochs: 1
+  learning_rate: 0.001
+  save_dir: runs/detection/mido
+
+env:
+  device: cpu

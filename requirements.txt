@@ -35,7 +35,13 @@ huggingface-hub>=0.16.0
 accelerate>=0.21.0
 peft>=0.4.0
 
+# Testing & Profiling
+pytest>=7.0.0
+
+# Deployment
+onnxruntime>=1.16.0
+
 # Optional packages for specific cell pathology tasks (Uncomment to install)
 # monai              # Deep learning for medical imaging
-# ultralytics        # For YOLO series detection and segmentation
+ultralytics>=8.0.0   # For YOLO series detection and segmentation
 # segment-anything   # For Meta's SAM (Segment Anything Model)
