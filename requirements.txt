@@ -40,6 +40,8 @@ pytest>=7.0.0
 
 # Deployment
 onnxruntime>=1.16.0
+cellpose>=3.0.0
+segmentation-models-pytorch>=0.3.3
 
 # Optional packages for specific cell pathology tasks (Uncomment to install)
 # monai              # Deep learning for medical imaging
