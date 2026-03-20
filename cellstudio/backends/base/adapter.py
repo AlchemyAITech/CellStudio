@@ -8,10 +8,11 @@ class BaseBackendAdapter(ABC):
     to ensure the engine layer remains completely agnostic to the underlying framework.
     """
     
-    def __init__(self, config: Dict):
+    def __init__(self, config: Dict, device: str = None):
         self.config = config
+        self.device = device
         self.model = self._build_model()
-        from pathstudio.engine.hooks import HookManager
+        from cellstudio.engine.hooks import HookManager
         self.hook_manager = HookManager()
         
     def register_hook(self, hook: Any):

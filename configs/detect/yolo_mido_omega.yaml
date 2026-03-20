@@ -1,0 +1,43 @@
+_base_:
+  - ../_base_/default_runtime.yaml
+
+task:
+  type: ObjectDetectionTask
+
+model:
+  type: UltralyticsDetAdapter
+  yaml_model: yolov8n.pt
+
+optimizer:
+  type: AdamW
+  lr: 0.001
+  weight_decay: 0.01
+
+train_dataloader:
+  batch_size: 4
+  num_workers: 2
+  dataset:
+    data_root: 'datasets/detection/MIDO'
+    ann_file: 'splits/train.json'
+    pipeline:
+      - type: LoadImageFromFile
+      - type: LoadAnnotations
+      - type: PackCellStudioInputs
+
+val_dataloader:
+  batch_size: 2
+  num_workers: 2
+  dataset:
+    data_root: 'datasets/detection/MIDO'
+    ann_file: 'splits/val.json'
+    pipeline:
+      - type: LoadImageFromFile
+      - type: LoadAnnotations
+      - type: PackCellStudioInputs
+
+val_evaluator:
+  metrics: []
+  plotters: []
+
+runner:
+  max_epochs: 2

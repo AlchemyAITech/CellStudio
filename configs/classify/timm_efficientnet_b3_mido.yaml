@@ -1,0 +1,79 @@
+_base_:
+  - ../_base_/default_runtime.yaml
+
+task:
+  type: ClassificationTask
+
+model:
+  type: TimmClassifier
+  architecture: efficientnet_b3
+  num_classes: 2
+  pretrained: true
+
+train_dataloader:
+  batch_size: 16
+  num_workers: 4
+  dataset:
+    type: StandardClassificationDataset
+    data_root: datasets/classfication/MIDOG
+    ann_file: standardized/mido_cls_train.json
+    pipeline:
+      - type: LoadImageFromFile
+      - type: Resize
+        size: [224, 224]
+      - type: Normalize
+        mean: [123.675, 116.28, 103.53]
+        std: [58.395, 57.12, 57.375]
+      - type: PackInputs
+        keys: ['img']
+
+val_dataloader:
+  batch_size: 16
+  num_workers: 4
+  dataset:
+    type: StandardClassificationDataset
+    data_root: datasets/classfication/MIDOG
+    ann_file: standardized/mido_cls_val.json
+    pipeline:
+      - type: LoadImageFromFile
+      - type: Resize
+        size: [224, 224]
+      - type: Normalize
+        mean: [123.675, 116.28, 103.53]
+        std: [58.395, 57.12, 57.375]
+      - type: PackInputs
+        keys: ['img']
+
+val_evaluator:
+  metrics:
+    - type: Accuracy
+    - type: F1_Score
+    - type: Precision
+    - type: Recall
+  plotters:
+    - type: ROCPlotter
+    - type: ConfusionMatrixPlotter
+
+optim_wrapper:
+  optimizer:
+    type: AdamW
+    lr: 0.0001
+    weight_decay: 0.05
+
+runner:
+  max_epochs: 100
+
+default_hooks:
+  checkpoint_hook:
+    type: CheckpointHook
+    interval: 10
+    save_best: 'accuracy'
+    rule: 'greater'
+
+custom_hooks:
+  plotter_hook:
+    type: TrainingProgressPlotterHook
+
+env:
+  cudnn_benchmark: true
+  device: cuda

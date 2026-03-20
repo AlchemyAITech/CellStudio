@@ -1,0 +1,32 @@
+env:
+  launcher: 'none'
+  backend: 'nccl'
+  device: 'cuda'
+  seed: 42
+  deterministic: False
+
+runner:
+  type: 'EpochBasedRunner'
+  max_epochs: 50
+
+use_amp: False
+
+default_hooks:
+  logger_hook:
+    type: 'TextLoggerHook'
+    interval: 10
+  optimizer_hook:
+    type: 'AmpOptimizerHook'
+    grad_clip: null
+  ema_hook:
+    type: 'EMAHook'
+    decay: 0.9999
+  checkpoint_hook:
+    type: 'CheckpointHook'
+    interval: 10
+    save_best: 'mAP50'
+    rule: 'greater'
+
+val_evaluator:
+  metrics: []
+  plotters: []
