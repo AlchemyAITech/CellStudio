@@ -1,5 +1,7 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from .registry import PIPELINE_REGISTRY
+
 
 @PIPELINE_REGISTRY.register('Compose')
 class Compose:

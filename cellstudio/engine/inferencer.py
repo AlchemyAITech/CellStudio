@@ -1,6 +1,8 @@
 import time
+from typing import Any, Dict, List
+
 import numpy as np
-from typing import Dict, Any, List
+
 
 class BaseONNXInferencer:
     """

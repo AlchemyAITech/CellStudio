@@ -1,11 +1,14 @@
 
 import os
-import numpy as np
+
 import matplotlib.pyplot as plt
-from sklearn.metrics import precision_recall_curve, auc
-from ..registry import PlotterRegistry
-from ..base import BasePlotter
+import numpy as np
+from sklearn.metrics import auc, precision_recall_curve
+
 from .. import init_plot_style
+from ..base import BasePlotter
+from ..registry import PlotterRegistry
+
 
 @PlotterRegistry.register("PR_Curve")
 class PRCurvePlotter(BasePlotter):

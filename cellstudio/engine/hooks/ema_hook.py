@@ -1,6 +1,7 @@
 from .base import Hook
 from .registry import HOOK_REGISTRY
 
+
 @HOOK_REGISTRY.register('EMAHook')
 class EMAHook(Hook):
     def __init__(self, decay=0.9999):

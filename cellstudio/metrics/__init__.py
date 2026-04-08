@@ -1,5 +1,7 @@
+from . import (
+    classification,  # noqa: F401
+    detection,  # noqa: F401
+    segmentation,  # noqa: F401
+)
 from .base import BaseMetric  # noqa: F401
-from .registry import MetricRegistry, MetricCollection  # noqa: F401
-from . import classification  # noqa: F401
-from . import detection  # noqa: F401
-from . import segmentation  # noqa: F401
+from .registry import MetricCollection, MetricRegistry  # noqa: F401

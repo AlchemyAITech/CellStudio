@@ -1,9 +1,12 @@
 import os
-import pandas as pd
+
 import matplotlib.pyplot as plt
-from ..registry import PlotterRegistry
-from ..base import BasePlotter
+import pandas as pd
+
 from .. import init_plot_style
+from ..base import BasePlotter
+from ..registry import PlotterRegistry
+
 
 @PlotterRegistry.register("Training_Curves")
 class TrainingCurvesPlotter(BasePlotter):

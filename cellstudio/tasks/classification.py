@@ -1,10 +1,11 @@
-from .base import BaseTask
-from .registry import TASK_REGISTRY
-from ..datasets.registry import DatasetRegistry
+from torch.utils.data import DataLoader
 
 # Automatically import implementations so globals register the components
 from ..datasets.collate import pseudo_collate
-from torch.utils.data import DataLoader
+from ..datasets.registry import DatasetRegistry
+from .base import BaseTask
+from .registry import TASK_REGISTRY
+
 
 @TASK_REGISTRY.register('ClassificationTask')
 class ClassificationTask(BaseTask):

@@ -1,7 +1,10 @@
 import os
-from omegaconf import DictConfig
-from cellstudio.backends.registry import BackendAdapterRegistry
+
 import torch
+from omegaconf import DictConfig
+
+from cellstudio.backends.registry import BackendAdapterRegistry
+
 
 class Tester:
     """Unified Tester interface for evaluating model metrics across different backends."""

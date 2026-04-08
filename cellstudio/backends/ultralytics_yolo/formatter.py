@@ -1,6 +1,8 @@
 import os
+
 import yaml
 from pathstudio.datasets.schema import CellDatasetConfig
+
 
 class YoloDataFormatter:
     """

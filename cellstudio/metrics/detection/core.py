@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def bbox_iou(box1, box2):
     if len(box2) == 0: return np.array([])
     x1 = np.maximum(box1[:, 0], box2[:, 0])

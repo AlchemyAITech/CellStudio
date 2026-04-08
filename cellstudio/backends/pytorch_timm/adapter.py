@@ -1,9 +1,11 @@
 import os
+from typing import Any, Dict
+
 from omegaconf import DictConfig
-from typing import Dict, Any
 
 from cellstudio.backends.base.adapter import BaseBackendAdapter
 from cellstudio.datasets.schema import CellDatasetConfig
+
 
 class TimmAdapter(BaseBackendAdapter):
     """
@@ -73,8 +75,9 @@ class TimmAdapter(BaseBackendAdapter):
             
         # Implementation of full PyTorch training loop
         print(f"[TimmAdapter] Preparing datasets and dataloaders...")
-        from torch.utils.data import Dataset, DataLoader
         from PIL import Image
+        from torch.utils.data import DataLoader, Dataset
+
         from cellstudio.datasets.transforms.factory import build_transforms
         
         class CellJsonDataset(Dataset):
@@ -228,9 +231,9 @@ class TimmAdapter(BaseBackendAdapter):
             self.model.reset_classifier(len(classes))
             self.model = self.model.to(self.device)
             
-        from torch.utils.data import Dataset, DataLoader
-        from torchvision import transforms
         from PIL import Image
+        from torch.utils.data import DataLoader, Dataset
+        from torchvision import transforms
         
         class CellJsonDataset(Dataset):
             def __init__(self, items, class_list, transform=None):

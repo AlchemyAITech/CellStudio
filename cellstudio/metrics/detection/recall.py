@@ -2,6 +2,7 @@ from ..base import BaseMetric
 from ..registry import MetricRegistry
 from .core import DetMatchCache
 
+
 @MetricRegistry.register("det_recall")
 class DetRecall(BaseMetric):
     def __init__(self, iou_thresh=0.5, **kwargs): self.iou_thresh = iou_thresh

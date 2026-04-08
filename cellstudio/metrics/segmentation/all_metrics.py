@@ -2,6 +2,7 @@ from ..base import BaseMetric
 from ..registry import MetricRegistry
 from .core import SegMatchCache
 
+
 @MetricRegistry.register("seg_all_metrics")
 class SegAllMetrics(BaseMetric):
     def __init__(self, iou_thresh=0.5, **kwargs): 

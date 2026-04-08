@@ -1,8 +1,10 @@
 from omegaconf import DictConfig
-from cellstudio.backends.ultralytics_yolo.adapter import YoloAdapter
-from cellstudio.backends.pytorch_timm.adapter import TimmAdapter
-from cellstudio.backends.unet.adapter import UnetAdapter
+
 from cellstudio.backends.cellpose.adapter import CellposeAdapter
+from cellstudio.backends.pytorch_timm.adapter import TimmAdapter
+from cellstudio.backends.ultralytics_yolo.adapter import YoloAdapter
+from cellstudio.backends.unet.adapter import UnetAdapter
+
 
 class BackendAdapterRegistry:
     """Registry for dynamically routing tasks to the correct Backend Adapter."""

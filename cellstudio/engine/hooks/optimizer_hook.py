@@ -1,6 +1,8 @@
 import torch
+
 from .base import Hook
 from .registry import HOOK_REGISTRY
+
 
 @HOOK_REGISTRY.register('AmpOptimizerHook')
 class AmpOptimizerHook(Hook):

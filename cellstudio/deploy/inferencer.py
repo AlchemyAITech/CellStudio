@@ -1,6 +1,7 @@
 import os
+from typing import Any, Dict, Union
+
 import numpy as np
-from typing import Dict, Any, Union
 
 try:
     import onnxruntime as ort
@@ -52,7 +53,7 @@ class ONNXInferencer:
         Generic preprocessing. Convert BGR to RGB, resize, normalize, and transpose to NCHW.
         Note: Specific tasks might require overriding this method.
         """
-        import cv2 # Local import for deployment module
+        import cv2  # Local import for deployment module
         img = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
         
         # Basic resize (without letterboxing for simplicity in this baseline)

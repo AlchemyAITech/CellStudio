@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
 def init_plot_style():
     sns.set_theme(style="whitegrid", palette="muted")
     plt.rcParams.update({
@@ -9,7 +10,9 @@ def init_plot_style():
         "figure.figsize": (8, 6), "savefig.dpi": 300, "savefig.bbox": "tight"
     })
 
+from . import (
+    classification,  # noqa: F401
+    curves,  # noqa: F401
+)
 from .base import BasePlotter  # noqa: F401
-from .registry import PlotterRegistry, PlotterCollection  # noqa: F401
-from . import classification  # noqa: F401
-from . import curves  # noqa: F401
+from .registry import PlotterCollection, PlotterRegistry  # noqa: F401

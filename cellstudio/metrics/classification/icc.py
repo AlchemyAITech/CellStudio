@@ -1,7 +1,10 @@
 import numpy as np
 import pandas as pd
-from ..registry import MetricRegistry
+
 from ..base import BaseMetric
+from ..registry import MetricRegistry
+
+
 @MetricRegistry.register("ICC")
 class ICC(BaseMetric):
     def __init__(self, **kwargs): pass

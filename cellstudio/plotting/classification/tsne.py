@@ -1,12 +1,15 @@
 
 import os
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
 from sklearn.manifold import TSNE
-from ..registry import PlotterRegistry
-from ..base import BasePlotter
+
 from .. import init_plot_style
+from ..base import BasePlotter
+from ..registry import PlotterRegistry
+
 
 @PlotterRegistry.register("t-SNE")
 class TSNEPlotter(BasePlotter):

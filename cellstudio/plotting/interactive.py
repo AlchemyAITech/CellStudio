@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider
 import numpy as np
+from matplotlib.widgets import Slider
 from sklearn.metrics import accuracy_score, f1_score
+
 
 def show_interactive_threshold_gui(y_true, y_prob):
     """

@@ -1,32 +1,69 @@
-from typing import Dict, Type
+"""Metric registry and collection utilities.
+
+Provides ``METRIC_REGISTRY`` for registering individual metric classes
+and ``MetricCollection`` for batch-computing a set of named metrics.
+"""
+
+from __future__ import annotations
+
+import logging
+from typing import Dict, Optional
+
+from ..core.registry import Registry
 from .base import BaseMetric
 
-class MetricRegistry:
-    _registry: Dict[str, Type[BaseMetric]] = {}
-    @classmethod
-    def register(cls, name: str):
-        def wrapper(metric_cls: Type[BaseMetric]):
-            cls._registry[name] = metric_cls
-            return metric_cls
-        return wrapper
-    @classmethod
-    def get(cls, name: str) -> Type[BaseMetric]:
-        if name not in cls._registry: raise KeyError(f"Metric '{name}' not found.")
-        return cls._registry[name]
+logger = logging.getLogger(__name__)
 
-    @classmethod
-    def build(cls, cfg: dict):
-        if cfg is None: return None
-        cfg_copy = cfg.copy()
-        plugin_type = cfg_copy.pop('type')
-        return cls.get(plugin_type)(**cfg_copy)
+METRIC_REGISTRY = Registry('metric')
+
+# Backward-compatible alias used extensively in existing code.
+MetricRegistry = METRIC_REGISTRY
+
 
 class MetricCollection:
-    def __init__(self, metric_names: list, **kwargs):
-        self.metrics = {n: MetricRegistry.get(n)(**kwargs) for n in metric_names}
-    def compute_all(self, y_true, y_pred, y_prob=None, **kwargs) -> Dict[str, float]:
-        results = {}
-        for n, m in self.metrics.items():
-            try: results[n] = m.compute(y_true, y_pred, y_prob, **kwargs)
-            except Exception: results[n] = 0.0
+    """Convenience container that evaluates multiple named metrics at once.
+
+    Args:
+        metric_names: List of registered metric names to instantiate.
+        **kwargs: Extra keyword arguments forwarded to each metric's
+            constructor.
+
+    Example:
+        >>> coll = MetricCollection(['Accuracy', 'F1Score'])
+        >>> results = coll.compute_all(y_true, y_pred)
+    """
+
+    def __init__(self, metric_names: list[str], **kwargs) -> None:
+        self.metrics: Dict[str, BaseMetric] = {
+            n: METRIC_REGISTRY.get(n)(**kwargs) for n in metric_names
+        }
+
+    def compute_all(
+        self,
+        y_true,
+        y_pred,
+        y_prob=None,
+        **kwargs,
+    ) -> Dict[str, float]:
+        """Compute every registered metric and return a flat dict.
+
+        Args:
+            y_true: Ground-truth labels / targets.
+            y_pred: Predicted labels / values.
+            y_prob: Optional predicted probabilities.
+            **kwargs: Forwarded to each metric's ``compute()`` method.
+
+        Returns:
+            Mapping from metric name to its scalar result.  Metrics
+            that raise are logged and recorded as ``0.0``.
+        """
+        results: Dict[str, float] = {}
+        for name, metric in self.metrics.items():
+            try:
+                results[name] = metric.compute(
+                    y_true, y_pred, y_prob, **kwargs,
+                )
+            except Exception:
+                logger.warning("Metric '%s' failed; recording 0.0.", name, exc_info=True)
+                results[name] = 0.0
         return results

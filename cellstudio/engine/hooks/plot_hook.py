@@ -1,7 +1,10 @@
 import os
+
 import matplotlib.pyplot as plt
+
 from .base import Hook
 from .registry import HOOK_REGISTRY
+
 
 @HOOK_REGISTRY.register('TrainingProgressPlotterHook')
 class TrainingProgressPlotterHook(Hook):

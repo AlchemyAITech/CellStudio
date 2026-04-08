@@ -1,8 +1,11 @@
-from typing import Dict, Any
-import torch
+from typing import Any, Dict
+
 import numpy as np
-from ..registry import PIPELINE_REGISTRY
+import torch
+
 from ...structures.results import DataSample, InstanceData
+from ..registry import PIPELINE_REGISTRY
+
 
 @PIPELINE_REGISTRY.register('PackCellStudioInputs')
 class PackCellStudioInputs:

@@ -1,6 +1,9 @@
 from sklearn.metrics import cohen_kappa_score
-from ..registry import MetricRegistry
+
 from ..base import BaseMetric
+from ..registry import MetricRegistry
+
+
 @MetricRegistry.register("Kappa")
 class Kappa(BaseMetric):
     def __init__(self, **kwargs): pass

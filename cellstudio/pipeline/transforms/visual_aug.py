@@ -1,7 +1,9 @@
-import numpy as np
 import cv2
+import numpy as np
 import torch
+
 from ..registry import PIPELINE_REGISTRY
+
 
 @PIPELINE_REGISTRY.register('RandomFlip')
 class RandomFlip:

@@ -1,10 +1,12 @@
 import os
+from typing import Any, Dict
+
 import torch
 from omegaconf import DictConfig
-from typing import Dict, Any
 
 from cellstudio.backends.base.adapter import BaseBackendAdapter
 from cellstudio.models.unet_plugin import UNetPlugin
+
 
 class UnetAdapter(BaseBackendAdapter):
     """

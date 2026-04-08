@@ -1,10 +1,12 @@
+import datetime
+import json
 import logging
 import os
-import json
 import time
-import datetime
+
 from .base import Hook
 from .registry import HOOK_REGISTRY
+
 
 @HOOK_REGISTRY.register('TextLoggerHook')
 class TextLoggerHook(Hook):

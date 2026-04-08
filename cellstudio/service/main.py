@@ -1,15 +1,16 @@
 import os
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
+
 import numpy as np
+from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 
 try:
     import cv2
 except ImportError:
     cv2 = None
 
-from pathstudio.service.schemas import InferenceResponse, TaskResponse, BBoxResponse
 from pathstudio.deploy.inferencer import ONNXInferencer
+from pathstudio.service.schemas import BBoxResponse, InferenceResponse, TaskResponse
 
 app = FastAPI(title="PathStudio API Service", version="1.0.0")
 

@@ -1,9 +1,11 @@
 import os
+from typing import Any, Dict
+
 from omegaconf import DictConfig
-from typing import Dict, Any
 
 from cellstudio.backends.base.adapter import BaseBackendAdapter
 from cellstudio.models.cellpose_plugin import CellposePlugin
+
 
 class CellposeAdapter(BaseBackendAdapter):
     """

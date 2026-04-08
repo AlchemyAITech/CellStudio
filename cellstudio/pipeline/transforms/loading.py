@@ -1,7 +1,10 @@
+from typing import Any, Dict
+
 import cv2
 import numpy as np
-from typing import Dict, Any
+
 from ..registry import PIPELINE_REGISTRY
+
 
 @PIPELINE_REGISTRY.register('LoadImageFromFile')
 class LoadImageFromFile:

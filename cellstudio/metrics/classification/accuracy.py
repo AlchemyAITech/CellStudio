@@ -1,6 +1,9 @@
 from sklearn.metrics import accuracy_score
-from ..registry import MetricRegistry
+
 from ..base import BaseMetric
+from ..registry import MetricRegistry
+
+
 @MetricRegistry.register("Accuracy")
 class Accuracy(BaseMetric):
     def __init__(self, **kwargs): pass

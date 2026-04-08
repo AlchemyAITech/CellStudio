@@ -1,9 +1,12 @@
 import os
-import torch
+
 import matplotlib.pyplot as plt
-from sklearn.metrics import roc_curve, auc, confusion_matrix, ConfusionMatrixDisplay
+import torch
+from sklearn.metrics import ConfusionMatrixDisplay, auc, confusion_matrix, roc_curve
+
 from .base import BasePlotter
 from .registry import PlotterRegistry
+
 
 @PlotterRegistry.register('ROCPlotter')
 class ROCPlotter(BasePlotter):

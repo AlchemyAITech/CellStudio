@@ -1,10 +1,14 @@
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
 import os
+
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+from cellstudio.metrics.detection.core import DetMatchCache
+
 from ..base import BasePlotter
 from ..registry import PlotterRegistry
-from cellstudio.metrics.detection.core import DetMatchCache
+
 
 @PlotterRegistry.register("det_medical_scatter")
 class DetMedicalScatterPlotter(BasePlotter):

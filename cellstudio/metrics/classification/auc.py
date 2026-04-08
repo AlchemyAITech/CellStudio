@@ -1,6 +1,9 @@
 from sklearn.metrics import roc_auc_score
-from ..registry import MetricRegistry
+
 from ..base import BaseMetric
+from ..registry import MetricRegistry
+
+
 @MetricRegistry.register("AUC")
 class AUC(BaseMetric):
     def __init__(self, num_classes=2, **kwargs): self.num_classes = num_classes

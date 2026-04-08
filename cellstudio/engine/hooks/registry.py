@@ -1,27 +1,13 @@
-class Registry:
-    def __init__(self, name):
-        self.name = name
-        self._registry = {}
+"""Hook registry.
 
-    def register(self, module_name=None):
-        def inner_wrapper(wrapped_class):
-            name = module_name if module_name is not None else wrapped_class.__name__
-            if name in self._registry:
-                raise ValueError(f"Module '{name}' already registered in {self.name}.")
-            self._registry[name] = wrapped_class
-            return wrapped_class
-        return inner_wrapper
+All lifecycle hooks (logger, checkpoint, optimizer, eval, etc.)
+register themselves here so the task's ``build_runner`` method can
+instantiate them from ``default_hooks`` configuration.
+"""
 
-    def build(self, cfg: dict):
-        if cfg is None:
-            return None
-        cfg_copy = cfg.copy()
-        if 'type' not in cfg_copy:
-            raise KeyError(f"Config for {self.name} must contain 'type' key.")
-        plugin_type = cfg_copy.pop('type')
-        if plugin_type not in self._registry:
-            raise KeyError(f"Module '{plugin_type}' is unknown in {self.name}.")
-        return self._registry[plugin_type](**cfg_copy)
+from cellstudio.core.registry import Registry
 
 HOOK_REGISTRY = Registry('hook')
+
+# Backward-compatible alias used in tasks/base.py.
 HookRegistry = HOOK_REGISTRY

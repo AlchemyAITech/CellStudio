@@ -1,10 +1,13 @@
 
 import os
+
 import matplotlib.pyplot as plt
 import seaborn as sns
-from ..registry import PlotterRegistry
-from ..base import BasePlotter
+
 from .. import init_plot_style
+from ..base import BasePlotter
+from ..registry import PlotterRegistry
+
 
 @PlotterRegistry.register("Metrics_Bar")
 class MetricsBarPlotter(BasePlotter):

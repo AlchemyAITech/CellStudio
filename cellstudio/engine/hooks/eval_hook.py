@@ -1,6 +1,7 @@
 from .base import Hook
 from .registry import HOOK_REGISTRY
 
+
 @HOOK_REGISTRY.register('EvalHook')
 class EvalHook(Hook):
     def __init__(self, evaluator):

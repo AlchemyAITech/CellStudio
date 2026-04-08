@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from omegaconf import OmegaConf, DictConfig
+
+from omegaconf import DictConfig, OmegaConf
+
 
 @dataclass
 class EnvironmentConfig:

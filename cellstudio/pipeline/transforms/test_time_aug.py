@@ -1,6 +1,8 @@
-from typing import Dict, Any, List
 import copy
+from typing import Any, Dict, List
+
 from ..registry import PIPELINE_REGISTRY
+
 
 @PIPELINE_REGISTRY.register('MultiScaleFlipAug')
 class MultiScaleFlipAug:

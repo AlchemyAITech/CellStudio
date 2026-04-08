@@ -1,6 +1,7 @@
 from omegaconf import DictConfig
 from pathstudio.backends.registry import BackendAdapterRegistry
 
+
 class Predictor:
     """Unified Predictor interface for batch inference across adapters."""
     

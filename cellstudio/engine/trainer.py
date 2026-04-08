@@ -1,7 +1,10 @@
 import os
-from omegaconf import DictConfig
-from cellstudio.backends.registry import BackendAdapterRegistry
+
 import torch
+from omegaconf import DictConfig
+
+from cellstudio.backends.registry import BackendAdapterRegistry
+
 
 class Trainer:
     """

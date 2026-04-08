@@ -1,7 +1,9 @@
+from torch.utils.data import DataLoader
+
+from ..datasets.collate import pseudo_collate
 from .base import BaseTask
 from .registry import TASK_REGISTRY
-from ..datasets.collate import pseudo_collate
-from torch.utils.data import DataLoader
+
 
 @TASK_REGISTRY.register('InstanceSegmentationTask')
 class InstanceSegmentationTask(BaseTask):

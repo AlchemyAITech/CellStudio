@@ -18,3 +18,12 @@ nav:
   - '一体化命令行终端 (Unified CLI)': cli.md
   - '全生命周期云端微服务 (FastAPI)': api.md
   - '白皮书级参数辞典 (Config Guide)': config.md
+  - 'API Reference':
+    - 'Engine (Runner & Hooks)': api/engine.md
+    - 'Tasks': api/tasks.md
+    - 'Datasets': api/datasets.md
+    - 'Metrics': api/metrics.md
+    - 'Backend Adapters': api/backends.md
+    - 'Inference': api/inference.md
+    - 'Data Structures': api/structures.md
+

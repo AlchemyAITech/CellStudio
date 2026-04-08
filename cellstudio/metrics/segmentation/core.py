@@ -1,16 +1,16 @@
 import numpy as np
 import torch
 
+
 def compute_instance_iou(gt_mask_binary, pred_mask_binary):
     intersection = np.logical_and(gt_mask_binary, pred_mask_binary).sum()
     union = np.logical_or(gt_mask_binary, pred_mask_binary).sum()
     return intersection / (union + 1e-6), intersection, union
 
 def compute_hd95(gt_mask, pred_mask):
-    from scipy.ndimage import distance_transform_edt
-    
     # Extract edges using morphological operations or just subtract erosion
     import cv2
+    from scipy.ndimage import distance_transform_edt
     kernel = np.ones((3,3), np.uint8)
     gt_erode = cv2.erode(gt_mask.astype(np.uint8), kernel)
     gt_edges = (gt_mask > 0) & (gt_erode == 0)
