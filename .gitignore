@@ -110,7 +110,12 @@ tmp/
 !docs/**/*.gif
 !README.md
 
-# Debug Scripts
+# Debug & Sandbox
 debug_*/
 /debug/
 sandbox/
+
+# Build artifacts & caches
+*.egg-info/
+.ruff_cache/
+

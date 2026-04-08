@@ -1,70 +1,126 @@
 # CellStudio 🔬
 
-这是一个**病理细胞深度学习综合项目**。本项目致力于收集并整合各类开源病理细胞数据集，构建高质量的细胞图像标准库，并在此基础上建立从基础到前沿的各类深度学习任务基线（Baseline）。
+**病理细胞深度学习综合框架** — 面向细胞病理学的全生命周期深度学习开发平台。
 
-## 🌟 核心特性 (Features)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10+-green.svg)](https://python.org)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org)
 
-- **🗂️ 标准数据集构建**：持续收集各类开源病理细胞数据集，进行统一数据清洗、结构化与标注格式化，构建标准化的细胞病理数据集库。
-- **📊 基础视觉任务基线**：
-  - **分类 (Classification)**：细胞类型识别、良恶性判断。
-  - **目标检测 (Object Detection)**：病理切片中的特定细胞或病灶精确定位。
-  - **分割 (Segmentation)**：细胞核、细胞质及相关区域的精细实例或语义分割。
-- **🧠 前沿模型与范式**：
-  - **大模型 (Large Models)**：引入视觉大模型（如 SAM、DINOv2 等）进行特征提取、微调或零样本泛化。
-  - **多模态 (Multi-modality)**：结合病理图像与临床文本报告进行多模态预训练与推理。
-  - **少样本与零样本学习 (Few-shot & Zero-shot Learning)**：探索在极少甚至无标注目标领域的模型泛化能力。
+## 🌟 核心特性
 
-## 📁 建议目录结构 (Project Structure)
+- **🗂️ 标准数据集** — 统一的 MIDO 格式数据集接口，支持分类、检测、分割三大任务
+- **🔧 插件化架构** — 基于统一 Registry 的组件注册机制，模型/数据集/指标/可视化全部可热插拔
+- **📊 三大视觉任务**
+  - **分类** — ResNet / EfficientNet / ConvNeXt / ViT / YOLOv8-cls 等
+  - **目标检测** — YOLOv8 / YOLO11 / YOLO26 / Faster R-CNN / DETR / FCOS / RTMDet
+  - **实例分割** — Cellpose / Cellpose-SAM / UNet
+- **⚡ Config-Driven** — 一个 YAML 文件定义完整实验，`_base_` 继承机制复用公共配置
+- **🌐 生产部署** — 内置 FastAPI 服务端，支持模型热加载和异步训练调度
+
+## 📁 项目结构
 
 ```text
 CellStudio/
-├── data/                  # 数据集存放目录（不在版本控制内）
-│   ├── raw/               # 原始数据集
-│   └── processed/         # 处理后标准格式数据集
-├── configs/               # 配置文件目录 (YAML/JSON)
-├── cellstudio/            # 核心源码目录
-│   ├── data/              # 数据加载与增强 (Dataset, DataLoader)
-│   ├── models/            # 网络模型定义 (网络结构、损失函数等)
-│   ├── engine/            # 训练、验证、测试逻辑
-│   └── utils/             # 工具函数 (指标计算、可视化、日志等)
-├── scripts/               # 各种任务的训练、推理入口脚本
-├── notebooks/             # Jupyter Notebooks (用于探索性数据分析、可视化)
-├── requirements.txt       # 环境依赖
-└── README.md              # 项目说明文档
+├── cellstudio/            # 核心框架源码
+│   ├── core/              #   通用 Registry 基类
+│   ├── engine/            #   Runner, Hooks, Config 引擎
+│   ├── tasks/             #   任务编排器 (Classification/Detection/Segmentation)
+│   ├── datasets/          #   数据集抽象与 MIDO 适配
+│   ├── models/            #   模型适配器 (forward_train / forward_test)
+│   ├── backends/          #   第三方后端隔离层 (Ultralytics / timm / Cellpose)
+│   ├── metrics/           #   评估指标 (Accuracy, mAP, Dice, PQ, ...)
+│   ├── plotting/          #   可视化 (ROC, PR, Confusion Matrix, ...)
+│   ├── evaluation/        #   评估编排器
+│   ├── inference/         #   推理引擎
+│   ├── pipeline/          #   数据变换 DAG (Compose + Transform Nodes)
+│   └── structures/        #   标准数据结构 (DataSample, InferResult)
+├── configs/               # YAML 配置文件
+│   ├── _base_/            #   公共运行时配置
+│   ├── classify/          #   分类任务配置
+│   ├── detect/            #   检测任务配置
+│   └── segmentation/      #   分割任务配置
+├── tools/                 # CLI 工具入口
+│   ├── train.py           #   训练入口
+│   ├── cli.py             #   统一命令行
+│   └── ...                #   分析 / 基准测试 / 数据处理工具
+├── api/                   # FastAPI 推理服务
+├── docs/                  # MkDocs 文档站
+├── tests/                 # 单元测试
+├── weights/               # 预训练权重 (.pt, .pth)
+└── sandbox/               # 本地调试脚本 (gitignored)
 ```
 
-## 🛠️ 安装说明 (Installation)
+## 🛠️ 安装
 
-1. 克隆仓库
 ```bash
+# 1. 克隆仓库
 git clone https://github.com/AlchemyAITech/CellStudio.git
 cd CellStudio
-```
 
-2. 创建并激活虚拟环境（推荐使用 Conda）
-```bash
+# 2. 创建环境 (Python 3.10+)
 conda create -n cellstudio python=3.10 -y
 conda activate cellstudio
-```
 
-3. 安装依赖项
-```bash
+# 3. 安装 PyTorch (根据 CUDA 版本选择)
+# 参考: https://pytorch.org/get-started/locally/
+
+# 4. 安装 CellStudio
 pip install -r requirements.txt
+# 或使用 pyproject.toml (可选依赖按需安装):
+# pip install -e ".[all]"
 ```
-*(注意：请根据您的硬件环境（如 GPU 型号、CUDA 版本），前往 [PyTorch 官网](https://pytorch.org/) 再次确认并安装对应版本的 PyTorch 生态组件)*
 
-## 🚀 快速开始 (Quick Start)
+## 🚀 快速开始
 
-*(建设中)* 各任务的训练与推理脚本及说明文档正在逐步完善。未来您将能够通过类似以下的命令快速启动不同任务：
+### 训练
 
 ```bash
-# 基线分类训练示例
-python scripts/train_classification.py --config configs/cls_baseline.yaml
+# 分类
+python tools/train.py --config configs/classify/timm_resnet50_mido.yaml
 
-# 目标检测推理示例
-python scripts/infer_detection.py --weights weights/det_best.pt --source data/test_images/
+# 检测 (Tile 模式)
+python tools/train.py --config configs/detect/yolo_v8m_det_mido_tile.yaml
+
+# 分割
+python tools/train.py --config configs/segmentation/cellpose_mido_seg.yaml
 ```
 
-## 🤝 贡献说明 (Contributing)
+### 推理
 
-欢迎提交 Issue 和 Pull Request 来完善数据集和算法基线。在提交代码前，请确保遵循本项目的代码规范。
+```python
+from cellstudio.inference.inferencer import CellStudioInferencer
+
+infer = CellStudioInferencer(
+    config_path='configs/classify/timm_resnet50_mido.yaml',
+    weight_path='runs/best.pth',
+)
+result = infer('path/to/image.png')
+print(result)
+```
+
+### API 服务
+
+```bash
+cd api && python main.py
+# POST /predict/{model_id} — 图片推理
+# POST /train              — 异步训练
+# GET  /status/{job_id}    — 查询任务状态
+```
+
+## 📖 文档
+
+完整 API 文档位于 `docs/` 目录，使用 MkDocs 构建：
+
+```bash
+pip install mkdocs-material
+mkdocs serve
+```
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request。提交前请确保：
+
+```bash
+ruff check cellstudio/  # 代码检查
+pytest tests/            # 单元测试
+```
