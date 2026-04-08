@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any
 import torch
 
-from .registry import TASK_REGISTRY
 from ..env.dist_env import init_dist
 from ..env.seed import set_random_seed
 from ..engine.runner.epoch_runner import EpochBasedRunner
@@ -59,8 +58,9 @@ class BaseTask(ABC):
             opt_type = opt_cfg_copy.pop('type')
             optimizer = getattr(torch.optim, opt_type)(self.model.parameters(), **opt_cfg_copy)
 
-        runner_cfg = self.cfg.get('runner', {'type': 'EpochBasedRunner', 'max_epochs': 100})
-        runner_type = runner_cfg.pop('type')
+        runner_cfg = dict(self.cfg.get('runner', {'type': 'EpochBasedRunner', 'max_epochs': 100}))
+        runner_type = runner_cfg.pop('type', 'EpochBasedRunner')
+        runner_cfg.pop('val_interval', None)  # Handled in epoch_runner.train() via self.cfg
         use_amp = self.cfg.get('use_amp', False)
         
         if runner_type == 'EpochBasedRunner':
@@ -71,20 +71,21 @@ class BaseTask(ABC):
                 val_dataloader=self.val_dataloader,
                 work_dir=self.work_dir,
                 use_amp=use_amp,
+                cfg=self.cfg,
                 **runner_cfg
             )
         else:
-            raise NotImplementedError(f"Runner {runner_type} strictly forbidden.")
+            raise NotImplementedError(f"Runner {runner_type} not supported.")
+
+        if self.evaluator and self.val_dataloader:
+            from ..engine.hooks.eval_hook import EvalHook
+            self.runner.register_hook(EvalHook(evaluator=self.evaluator))
 
         hooks_cfg = self.cfg.get('default_hooks', {})
         for hook_name, hk_cfg in hooks_cfg.items():
             if hk_cfg:
                 hk_instance = HookRegistry.build(hk_cfg)
                 self.runner.register_hook(hk_instance)
-                
-        if self.evaluator and self.val_dataloader:
-            from ..engine.hooks.eval_hook import EvalHook
-            self.runner.register_hook(EvalHook(evaluator=self.evaluator))
 
     def execute(self, mode='train'):
         self.build_env()

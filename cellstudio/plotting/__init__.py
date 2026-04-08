@@ -9,7 +9,7 @@ def init_plot_style():
         "figure.figsize": (8, 6), "savefig.dpi": 300, "savefig.bbox": "tight"
     })
 
-from .base import BasePlotter
-from .registry import PlotterRegistry, PlotterCollection
-from . import classification
-from . import curves
+from .base import BasePlotter  # noqa: F401
+from .registry import PlotterRegistry, PlotterCollection  # noqa: F401
+from . import classification  # noqa: F401
+from . import curves  # noqa: F401

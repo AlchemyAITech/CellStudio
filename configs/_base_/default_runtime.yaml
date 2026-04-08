@@ -17,7 +17,9 @@ default_hooks:
     interval: 10
   optimizer_hook:
     type: 'AmpOptimizerHook'
-    grad_clip: null
+    grad_clip: 
+      max_norm: 35
+      norm_type: 2
   ema_hook:
     type: 'EMAHook'
     decay: 0.9999

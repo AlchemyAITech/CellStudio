@@ -1,0 +1,20 @@
+site_name: CellStudio MLOps Platform
+site_description: Deep Learning Architecture designed for extreme decoupling and inference efficiency.
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: indigo
+    accent: deep purple
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.expand
+    - navigation.top
+
+nav:
+  - '首页架构 (Home)': index.md
+  - '一体化命令行终端 (Unified CLI)': cli.md
+  - '全生命周期云端微服务 (FastAPI)': api.md
+  - '白皮书级参数辞典 (Config Guide)': config.md

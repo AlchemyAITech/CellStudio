@@ -16,14 +16,26 @@ class LoadImageFromFile:
             
         filename = results['img_path']
         
-        # Medical format branching
-        if filename.endswith(('.svs', '.ndpi', '.tif', '.tiff')):
+        # Medical WSI format branching — only true WSI formats use OpenSlide
+        # Regular .tif/.tiff files should be loaded with cv2 (e.g. MIDO dataset)
+        if filename.endswith(('.svs', '.ndpi')):
             img = self._load_wsi(filename)
         else:
             flag = cv2.IMREAD_COLOR if self.color_type == 'color' else cv2.IMREAD_GRAYSCALE
-            img = cv2.imread(filename, flag)
-            if self.color_type == 'color' and img is not None:
-                cv2.cvtColor(img, cv2.COLOR_BGR2RGB, img)
+            # CRITICAL: Use cv2.imdecode instead of cv2.imread to bypass
+            # ultralytics' monkey-patched imread which crashes on multi-frame TIFFs.
+            # cv2.imdecode reads from a numpy buffer and is not patched.
+            buf = np.fromfile(filename, dtype=np.uint8)
+            img = cv2.imdecode(buf, flag)
+            if img is None:
+                # Some TIFFs need IMREAD_UNCHANGED; try that and convert
+                img = cv2.imdecode(buf, cv2.IMREAD_UNCHANGED)
+            if img is not None:
+                # Strip alpha channel if present (RGBA -> RGB)
+                if len(img.shape) == 3 and img.shape[2] == 4:
+                    img = img[:, :, :3]
+                if self.color_type == 'color' and len(img.shape) == 3:
+                    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 
         if img is None:
             raise FileNotFoundError(f"Failed to ingest: {filename}")
@@ -38,7 +50,6 @@ class LoadImageFromFile:
 
     def _load_wsi(self, filename: str):
         # Implementation of OpenSlide python interface
-        import os
         return np.zeros((1024, 1024, 3), dtype=np.uint8) # Structural scaffolding
 
 @PIPELINE_REGISTRY.register('LoadAnnotations')

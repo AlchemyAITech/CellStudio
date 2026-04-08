@@ -109,3 +109,8 @@ tmp/
 !docs/**/*.jpg
 !docs/**/*.gif
 !README.md
+
+# Debug Scripts
+debug_*/
+/debug/
+sandbox/

@@ -1,4 +1,4 @@
-from typing import Dict, Type, Any
+from typing import Dict, Type
 from .base import BaseMetric
 
 class MetricRegistry:

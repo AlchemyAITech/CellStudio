@@ -1,4 +1,4 @@
-import pytest
+import pytest  # noqa: F401
 from pathstudio.engine.hooks import HookManager, BaseHook
 
 class DummyHook(BaseHook):

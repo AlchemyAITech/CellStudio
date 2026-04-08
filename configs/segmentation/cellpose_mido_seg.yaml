@@ -1,0 +1,60 @@
+_base_:
+  - ../_base_/default_runtime.yaml
+
+task:
+  type: InstanceSegmentationTask
+model:
+  type: CellposeSegAdapter
+  model_type: cyto3
+  pretrained_model: ''
+train_dataloader:
+  batch_size: 4
+  num_workers: 0
+  dataset:
+    type: CellposeSegmentationDataset
+    data_root: datasets/segmentation/cellpose
+    ann_file: splits/train_fold0.json
+    pipeline:
+    - type: LoadImageFromFile
+    - type: Resize
+      size:
+      - 256
+      - 256
+    - type: RandomFlip
+      prob: 0.5
+    - type: PackCellStudioInputs
+val_dataloader:
+  batch_size: 4
+  num_workers: 0
+  dataset:
+    type: CellposeSegmentationDataset
+    data_root: datasets/segmentation/cellpose
+    ann_file: splits/val_fold0.json
+    pipeline:
+    - type: LoadImageFromFile
+    - type: Resize
+      size:
+      - 256
+      - 256
+    - type: PackCellStudioInputs
+val_evaluator:
+  metrics:
+  - type: seg_all_metrics
+  plotters: []
+optim_wrapper:
+  optimizer:
+    type: AdamW
+    lr: 0.001
+    weight_decay: 0.05
+param_scheduler:
+- type: CosineAnnealingLR
+  T_max: 100
+  eta_min: 1.0e-06
+runner:
+  max_epochs: 100
+  val_interval: 1
+log_config:
+  interval: 1
+env:
+  cudnn_benchmark: false
+  device: cuda

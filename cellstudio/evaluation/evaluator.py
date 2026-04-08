@@ -1,4 +1,4 @@
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from ..metrics.registry import MetricRegistry
 from ..plotting.registry import PlotterRegistry
 
@@ -31,7 +31,6 @@ class Evaluator:
         """
         metrics_result = {}
         import torch
-        import numpy as np
         y_true = []
         y_pred = []
         y_prob = None
@@ -44,42 +43,37 @@ class Evaluator:
             y_prob = torch.cat([p['probs'] for p in self._predictions]).numpy()
         else:
             # Fallback for detection/segmentation arrays
-            y_true, y_pred, y_prob = self._data_samples, self._predictions, None
+            y_true, y_pred, y_prob = [batch.get('data_samples', []) for batch in self._data_samples], self._predictions, None
 
         # 1. Compute Base Metrics safely
         for metric in self.metrics:
-            try:
-                # Metrics expect matching signatures: (preds, targets)
-                metric_val = metric.compute(y_true=y_true, y_pred=y_pred, y_prob=y_prob) 
-            except TypeError:
-                metric_val = metric.compute(self._predictions, self._data_samples)
+            # Metrics expect matching signatures: (preds, targets)
+            metric_val = metric.compute(y_true=y_true, y_pred=y_pred, y_prob=y_prob) 
                 
             if isinstance(metric_val, dict):
                 metrics_result.update(metric_val)
             elif metric_val is not None:
                 metrics_result[metric.__class__.__name__] = metric_val
                 
-        # 2. Render Advanced Visualizations
-        for plotter in self.plotters:
-            try:
-                try:
-                    plotter.plot(save_dir=work_dir, y_true=y_true, y_pred=y_pred, y_prob=y_prob) 
-                except TypeError:
-                    plotter.plot(save_dir=work_dir, predictions=self._predictions, data_samples=self._data_samples)
-            except Exception as e:
-                import traceback
-                print(f"[Evaluator] Plotter {plotter.__class__.__name__} encountered a non-fatal plotting exception:")
-                traceback.print_exc()
+        # 2. Plotting is deferred: Model results are written to prediction files.
+        # User requested to only plot Best and Last epochs, which is handled
+        # externally via plot_results.py to avoid epoch-loop matplotlib bottlenecks.
             
         # 3. Memory Cleanup post-epoch & Save Predictions
         import os
-        import pickle
-        pred_file = os.path.join(work_dir, 'predictions.pkl')
-        try:
-            with open(pred_file, 'wb') as f:
-                pickle.dump({'y_true': y_true, 'y_pred': y_pred, 'y_prob': y_prob}, f)
-        except Exception as e:
-            print(f"[Evaluator] Failed to save predictions to {pred_file}: {e}")
+        
+        # Determine task type heuristically to avoid picking up dense mask blobs
+        # Determine task type heuristically to avoid picking up dense mask blobs
+        if self._predictions and not isinstance(self._predictions[0], list):
+            import pickle
+            pred_file = os.path.join(work_dir, 'predictions.pkl')
+            try:
+                # Disable massively dense pickles for Instance Segmentation (List of infer results)
+                if len(self._predictions) > 0 and 'CellStudioInferResult' not in str(type(self._predictions[0])):
+                    with open(pred_file, 'wb') as f:
+                        pickle.dump({'y_true': y_true, 'y_pred': y_pred, 'y_prob': y_prob}, f)
+            except Exception:
+                pass
             
         self._predictions.clear()
         self._data_samples.clear()

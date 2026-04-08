@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Tuple, Dict, Callable
+from typing import List, Tuple, Dict
 
 class WSIProcessor:
     """

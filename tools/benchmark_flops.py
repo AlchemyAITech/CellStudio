@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from cellstudio.engine.config.config import Config
 from cellstudio.models.builder import MODEL_REGISTRY
 import cellstudio.models.adapters.timm_adapter
-import cellstudio.models.adapters.ultralytics_adapter
+import cellstudio.models.adapters.ultralytics_adapter  # noqa: F401
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Compute FLOPs and Params for a Zenith Model Config')

@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from typing import List, Dict, Any, Union
+from typing import Dict, Any, Union
 
 try:
     import onnxruntime as ort

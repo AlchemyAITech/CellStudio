@@ -1,1 +1,1 @@
-from .scatter import DetMedicalScatterPlotter
+from .scatter import DetMedicalScatterPlotter  # noqa: F401

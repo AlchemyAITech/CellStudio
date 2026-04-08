@@ -1,6 +1,6 @@
 import argparse
-from pathstudio.configs.schema import load_config
-from pathstudio.engine.tester import Tester
+from cellstudio.configs.schema import load_config
+from cellstudio.engine.tester import Tester
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Test a PathStudio model")

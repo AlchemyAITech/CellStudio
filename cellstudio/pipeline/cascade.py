@@ -1,6 +1,5 @@
 from typing import List, Dict, Any
 import numpy as np
-import cv2
 
 class CascadePipeline:
     """

@@ -52,5 +52,11 @@ class PackCellStudioInputs:
         if has_gt:
             data_sample.gt_instances = gt_instances
             
+        if 'gt_semantic_seg' in results:
+            data_sample.gt_semantic_seg = torch.from_numpy(results['gt_semantic_seg']).long()
+        if 'gt_instance_seg' in results:
+            data_sample.gt_instance_seg = torch.from_numpy(results['gt_instance_seg']).long()
+
+            
         packed_results['data_samples'] = data_sample
         return packed_results

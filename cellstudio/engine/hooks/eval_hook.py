@@ -10,5 +10,10 @@ class EvalHook(Hook):
         self.evaluator.process(runner.data_batch, runner.outputs)
 
     def after_val_epoch(self, runner, **kwargs):
-        metrics = self.evaluator.evaluate(runner.work_dir)
-        runner.val_metrics = metrics
+        eval_metrics = self.evaluator.evaluate(runner.work_dir)
+        # Merge dicts such as val_loss generated purely by the runner forwards
+        incoming_metrics = kwargs.get('metrics', {})
+        if incoming_metrics:
+            eval_metrics.update(incoming_metrics)
+            
+        runner.val_metrics = eval_metrics

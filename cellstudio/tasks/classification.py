@@ -3,7 +3,6 @@ from .registry import TASK_REGISTRY
 from ..datasets.registry import DatasetRegistry
 
 # Automatically import implementations so globals register the components
-from ..datasets import classification
 from ..datasets.collate import pseudo_collate
 from torch.utils.data import DataLoader
 

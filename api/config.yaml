@@ -1,0 +1,21 @@
+# API Service Definitions and Cached Pre-Loads
+
+server:
+  host: "0.0.0.0"
+  port: 18080
+  workers: 1
+
+# Models defined here are pre-loaded directly into GPU VRAM on startup
+# which unlocks 0-latency inference at the endpoint: /predict/{model_id}
+models:
+  # Example configuration routing for the ResNet18 model
+  resnet18_test:
+    config: "../configs/classify/timm_resnet18_mido_test.yaml"
+    checkpoint: "../work_dirs/timm_resnet18_mido/latest.pth"
+    device: "cuda"
+    
+  # Example layout for YOLO
+  # yolo_test:
+  #   config: "../configs/classify/yolo_v8m_cls_mido.yaml"
+  #   checkpoint: "../work_dirs/yolo_v8m_cls_mido/best.pth"
+  #   device: "cuda"

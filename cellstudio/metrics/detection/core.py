@@ -16,6 +16,29 @@ class DetMatchCache:
     _state = {}
     @classmethod
     def get(cls, true_boxes_list, pred_boxes_list, pred_scores_list=None, iou_thresh=0.5):
+        flat_true = []
+        flat_pred = []
+        flat_scores = []
+        
+        if len(true_boxes_list) > 0 and isinstance(true_boxes_list[0], list):
+            for b_idx in range(len(true_boxes_list)):
+                batch_t = true_boxes_list[b_idx]
+                batch_p = pred_boxes_list[b_idx]
+                for i in range(len(batch_t)):
+                    ds = batch_t[i]
+                    if isinstance(batch_p, dict):
+                        print(f"FATAL TYPING: pred_boxes_list[{b_idx}] is a dict! Keys: {batch_p.keys()}")
+                    res = batch_p[i]
+                    flat_true.append(ds.get('gt_bboxes'))
+                    flat_pred.append(res.bboxes)
+                    if hasattr(res, 'scores'):
+                        flat_scores.append(res.scores)
+                    else:
+                        flat_scores.append(None)
+            true_boxes_list = flat_true
+            pred_boxes_list = flat_pred
+            pred_scores_list = flat_scores
+            
         current_id = id(true_boxes_list) ^ id(pred_boxes_list)
         if cls._last_id != current_id:
             cls._state = cls._compute(true_boxes_list, pred_boxes_list, pred_scores_list, iou_thresh)

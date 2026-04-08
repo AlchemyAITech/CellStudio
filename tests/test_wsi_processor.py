@@ -1,5 +1,5 @@
 import numpy as np
-import pytest
+import pytest  # noqa: F401
 from pathstudio.utils.wsi_processor import WSIProcessor
 
 def test_wsi_processor_sliding_window():
@@ -27,7 +27,7 @@ def test_wsi_processor_sliding_window():
     assert (t_last[3] - t_last[1]) == 512
 
 def test_wsi_soft_nms():
-    processor = WSIProcessor()
+    WSIProcessor()
     
     boxes = np.array([
         [100, 100, 200, 200], # A

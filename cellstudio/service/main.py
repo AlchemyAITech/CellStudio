@@ -1,8 +1,6 @@
 import os
-import io
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
 import numpy as np
 
 try:

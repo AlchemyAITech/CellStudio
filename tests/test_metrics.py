@@ -1,5 +1,5 @@
 import numpy as np
-import pytest
+import pytest  # noqa: F401
 from pathstudio.utils.metrics import MedicalMetrics
 
 def test_kappa():

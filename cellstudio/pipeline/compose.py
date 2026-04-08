@@ -1,4 +1,4 @@
-from typing import Callable, List, Dict, Any
+from typing import List, Dict, Any
 from .registry import PIPELINE_REGISTRY
 
 @PIPELINE_REGISTRY.register('Compose')
