@@ -100,8 +100,8 @@ git push -u origin master
 - **(2) 模型推理用数据结构（算法数据）**：依托上述图元组件对模型推理结果进行强制映射（标识 `source_type='algorithm'`），无论多么复杂的下游任务输出，最终都降维转换为以上标准图元类型的组合输出。
 - **(3)** 支持算法数据和人工数据的相似度匹配，对于匹配上的算法数据，加上人工标注的 ID 标识，并记录相似度。
   - *工程落实*：在底层增加 `MatchCache` 工具，提供 `compute_udf_iou(pred_feature, gt_feature)` 接口，当 `IoU > thresh` 时映射 ID 作为外键保存，并留出 `confidence` 和 `match_metric` 属性（该部分剥离为通用库 `cellstudio/utils/match.py`，供未来前后端预打标复用修正）。
-- **(4)** 各类型 WSI 读取显示：封装底层滑窗与金字塔层级引擎（接入 `OpenSlide` 或 `TiffFile` API）。
-- **(5)** 数据增广：在 Pipeline 层实现可配拔插的 Transforms 函数链 (`Resize`, `RandomFlip`, 参数色彩偏移等)。
+- **(4) 超大基质提取与物理单位归一 (WSI / MPP Reading)**：封装底层滑窗与金字塔层级引擎（接入 `OpenSlide` / `TiffFile` API），**原生支持瓦块切片 (Tile Slicing)**。彻底解决病理金字塔图像无法直接入显存的问题。同时，建立**统一 MPP (Microns Per Pixel)** 读取基准：底层在切图和读取时，必须解析文件自带的物理分辨率/微米级缩放率，把不同扫描仪、不同放大倍率摄取的图像强制采样到指定的目标 MPP，保证模型看到的物理细胞尺寸始终一致。
+- **(5) 专属病理数据增广 (Pathology-Aware Augmentations)**：在 Pipeline 层实现可配拔插的 Transforms 函数链 (`Resize`, `RandomFlip`, 色彩偏移等)。此外，专门开发病理大图特供的**延展旋转 (Topology Expand Rotation)** ——在旋转切块时并非用黑边去补足三角形空缺，而是通过计算扩展边界外延后执行旋转裁剪，最大程度保持切面连贯性；且该模块要向下降级完全兼容普遍的常规旋转 (Conventional Rotate)。
 - **(6)** 构建全类型测试数据，并按照当前设计的 JSON 数据结构实现数据集自动化实例化存储脚本。
 - **(7)** 测试验证数据结构正确：编写并运行各类 `tests/integration` 端到端回归测试用例。
 - **(8)** 逐步支持各类型数据（分类框、实例分割多边形、关键点等）流式特征标注反写模块。
@@ -119,7 +119,9 @@ git push -u origin master
 
 ## 3. 通用模型测试/推理 (Inferencer)
 - **(1) 基础可编程推理接口 (`BaseInferencer`)**：支持底层直接挂载单张图像 `predict_image()` 和 批量图像流 `predict_batch()` 的逻辑引擎。
-- **(2) WSI 超大图推理拼接层**：实现程序滑窗切块 (`sliding_window_inference`) 预处理，执行推理后再以 NMS（非极大值抑制）对拼缝输出的特征重构组合。
+- **(2) WSI 超大图推理拼接与结果融合 (Detection/Segmentation Fusion)**：
+  - 实现程序滑窗切块 (`sliding_window_inference`) 预处理，设定固定 Overlap (步长与切片重叠区间)。
+  - **检测框融合机制**：执行推理后，强制收集全局切片边界内的所有边框绝对坐标。通过 **NMS（非极大值抑制）与 Soft-NMS** 对跨界拼缝处重叠输出的重叠特征进行合并剔除，完成病理全图无缝拼接重构。
 - **(3) 输出规范化处理**：推理输出结果对象化，把零散 Tensor 强制序列化清洗，输出回统一的 `CSUFeatureCollection` 结构。
 - **(4) 推理引擎工具与可配层**：实现支持输出分类热力图表现 (`heatmap`)，及掩码覆盖混合层渲染器。
 - **(5) 构建测试用 CLI/API**：如 `tools/test.py` 及后端开放的 `FastAPI` 预留接口（如 `/api/v1/models/{id}/predict`），能够同时应对轻量图回调与大图异步任务结果下放的逻辑流转。

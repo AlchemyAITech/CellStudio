@@ -32,9 +32,11 @@
   - **[可视化验证]** 构建基础张量还原绘图探针：提取 DataLoader Batch，逆归一化并叠绘 BBox/Mask。
   - **[一致性比对]** UDF字典可视化：实现 JSON 原始解析（红线）与 Dataloader 提取流（绿线）的 100% 同屏对齐校验。
 - [ ] 构建数据增广 (Data Augmentations) 可视化打靶引擎 (`tools/debug_visual_aug.py`)。
+  - **[病理专属变换]** 实现并验证 `PathologyRotateExpand`：支持在切块旋转时进行外延扩展防止边角黑边，兼容常规裁剪。
   - 强制启动大尺度空间扭曲 (`ElasticTransform` / 旋转偏移等)，肉眼并排查验多边形是否发生脱靶、越界报错。
-- [ ] 各类型 WSI 读取引擎桥接（`OpenSlide`/`TiffFile`）。
-  - **[拼缝验证]** 滑窗连通性（Seams）拼图查验，确保切割与重组无特征断裂。
+- [ ] 各类型 WSI 超大图读取引擎桥接（`OpenSlide`/`TiffFile`）。
+  - **[瓦块与 MPP 映射]** 研发瓦块按需切图抽取支持 (Tile Slicing)，并严格强制挂载 **Target MPP (固定物理分辨率)** 缩放过滤。
+  - **[拼缝验证]** 滑窗连通性（Seams）拼图查验，确保按照指定 Overlap 切割与重组无特征断裂。
 - [ ] **[数据脚本]** 构建全类型测试数据，按照最新的 UDF JSON 数据结构规范实现数据集自动化实例化与落盘生成脚本 (`tools/prepare_datasets.py`)。
 - [ ] **[端到端回归]** 测试验证数据结构正确：参考测试指南，编写并运行各类 `tests/integration/` 端到端防 OOM 与图元边界回归测试用例。
 - [ ] **[标注重构成]** 研发流式特征反写模块 (Serialization Dumper)：逐步支持分类属性、检测 BBox、分割 Polygon、关键点输出反向序列化流转，回写存入规范的 `CSUFeatureCollection` 对象中。
@@ -84,8 +86,10 @@
 ## Phase 3: 推理引擎与结果重构 - Inferencer (预计: 4 days)
 *目标：实现端到端的长链预测与大图超分辨率拆解拼合。*
 - [ ] 编写 `BaseInferencer` 基类与单图前向方法。
-- [ ] 实现核心超大 WSI 切图预测与后处理合并重构（`sliding_window_inference` + NMS / Block Blend）。
-- [ ] 将 Tensor 结果强制反向序列化挂载回 `CSUFeatureCollection`。
+- [ ] 实现核心超大 WSI 切图预测与后处理合并重构。
+  - 基本框架：`sliding_window_inference` 预处理。
+  - **[新增] 检测特征多级融合**：实现并测试针对跨瓦块边界重叠框的提取重组与 **全局 Non-Maximum Suppression (NMS) / Soft-NMS 去重算法**。
+- [ ] 将 Tensor 结果强制反向序列化挂载回 `CSUFeatureCollection`，计算归一化 MPP 输出。
 - [ ] 推理热力图 (Heatmap) / 特征重投影绘制输出引擎构建。
 - [ ] 封装独立测试 `tools/test.py`。
 
