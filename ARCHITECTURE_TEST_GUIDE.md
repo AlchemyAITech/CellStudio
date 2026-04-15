@@ -55,27 +55,29 @@
 
 本测试流旨在彻底验证 19 套模型是否能在 CellStudio 系统内顺畅无阻地被实例化、输入特征切片、正确反向传递并在最后完成 Checkpoints 权重落盘。
 
-### 2.1 图像分类模型簇 (Classification Adapters)
+### 3.1 图像分类模型簇 (Classification Adapters)
 **总数量：6 套** | **要求**：在 `configs/classify/` 中通过 `--debug` 拉起测试配置文件。
-- [ ] 测试 `TimmClassifier` 的前向流转 (ResNet50, EfficientNet-B4, ConvNeXt-Tiny, ViT-Base)。
+- [ ] 测试 `TimmClassifier` 的前向流转 (`ResNet50`, `EfficientNet-B4`, `ConvNeXt-Tiny`, `ViT-Base`)。
   - *观测指标*：`CrossEntropyLoss` 下降；验证 ViT 的输入通道归纳偏置是否被异常阻拦。
-- [ ] 测试 `UltralyticsClsAdapter` 工业级流转 (YOLOv8m-cls, YOLOv26-cls)。
+- [ ] 测试 `UltralyticsClsAdapter` 工业级流转 (`YOLOv8m-cls`, `YOLOv26m-cls`)。
   - *观测指标*：测试 `tools/train.py` 是否正常承接了 Ultralytics 引擎库内的参数。
 
-### 2.2 目标检测模型簇 (Detection Adapters)
+### 3.2 目标检测模型簇 (Detection Adapters)
 **总数量：7 套** | **要求**：检测目标多且密集，重点查验 BBox 和类别对齐。
-- [ ] 测试 `UltralyticsDetAdapter` 架构 (YOLOv8m, YOLOv26m)。
+- [ ] 测试 `UltralyticsDetAdapter` 架构 (`YOLOv8m-det`, `YOLOv26m-det`)。
   - *观测指标*：原生 Tile 切图能否被裁剪缩压后正确投影 bbox，Loss 是否下降。
-- [ ] 测试 `MMDetAdapter` 架构 (Faster R-CNN, FCOS, RTMDet, DETR, RetinaNet)。
+- [ ] 测试 `MMDetAdapter` 架构 (`Faster R-CNN`, `FCOS`, `RTMDet-M`, `DETR`, `RetinaNet`)。
   - *观测指标*：Two-Stage 与 One-Stage RPN 网络层的加载；Transformer (DETR) `objectness_loss` 匹配无异常。
 
-### 2.3 医学图像分割模型簇 (Segmentation Adapters)
+### 3.3 医学图像分割模型簇 (Segmentation Adapters)
 **总数量：6 套** | **要求**：医学分割的核心难点是内存占用，需验证并行与张量解析。
-- [ ] 测试 `SMPAdapter` 架构体系 (UNet, DeepLabV3+)。
+- [ ] 测试 `SMPAdapter` 架构体系 (`UNet`, `DeepLabV3+`)。
   - *观测指标*：Skip connections、ASPP 激活情况；Dice/BCE Loss 平滑下降。
-- [ ] 测试 `UltralyticsSegAdapter` 架构 (YOLOv8m-seg)。
-- [ ] 测试细胞原生库级联 `CellposeAdapter` (Cellpose, Cellpose-SAM)。
+- [ ] 测试 `UltralyticsSegAdapter` 架构 (`YOLOv8m-seg`)。
+- [ ] 测试细胞原生库级联 `CellposeAdapter` (`Cellpose`, `Cellpose-SAM`)。
   - *观测指标*：SAM Transformer 头的位置编码 (Positional Embeddings) 和 Vector Flow 解算正常工作，不抛溢出报错。
+- [ ] 测试 `MMDetAdapter` 实例分割挂载 (`Mask R-CNN`)。
+  - *观测指标*：经典的两阶段分割头输出解析，确认生成独立掩码。
 
 ---
 
