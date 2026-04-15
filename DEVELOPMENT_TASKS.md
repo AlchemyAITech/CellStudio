@@ -29,13 +29,15 @@
 - [x] 构建相似度匹配引擎 `MatchCache` (`compute_udf_iou`) 并可视化验证。
 - [x] **(✅ 已修复)** 解决 `visual_aug.py` 中 `IndexError` (因 Augmentation 裁剪造成的 bbox 与 label 索引偏移错位)。
 - [ ] 完善 `UDFDataset` 及统一的 Dataloader 读取流验证（对三种任务类型跑通端到端 DataLoader 迭代）。
-  - **[新增]** 构建基础张量还原绘图探针：提取 DataLoader Batch，逆归一化并叠绘 BBox/Mask。
-  - **[新增]** UDF字典一致性可视化：实现 JSON 原始解析（红线）与 Dataloader 提取流（绿线）的 100% 同屏像素对齐校验。
+  - **[可视化验证]** 构建基础张量还原绘图探针：提取 DataLoader Batch，逆归一化并叠绘 BBox/Mask。
+  - **[一致性比对]** UDF字典可视化：实现 JSON 原始解析（红线）与 Dataloader 提取流（绿线）的 100% 同屏对齐校验。
 - [ ] 构建数据增广 (Data Augmentations) 可视化打靶引擎 (`tools/debug_visual_aug.py`)。
-  - 强制启动大尺度空间扭曲 (`ElasticTransform` / 旋转偏移等)。
-  - 并排比较 Source Image 与 Augmented Image，彻底用肉眼排查因像 `IndexError` 类矩阵越界或漂移导致标注“脱靶”的多边形漏洞。
+  - 强制启动大尺度空间扭曲 (`ElasticTransform` / 旋转偏移等)，肉眼并排查验多边形是否发生脱靶、越界报错。
 - [ ] 各类型 WSI 读取引擎桥接（`OpenSlide`/`TiffFile`）。
-  - **[新增]** 滑窗连通性（Seams）拼图可视化查验，确保切割与重组无特征断裂。
+  - **[拼缝验证]** 滑窗连通性（Seams）拼图查验，确保切割与重组无特征断裂。
+- [ ] **[数据脚本]** 构建全类型测试数据，按照最新的 UDF JSON 数据结构规范实现数据集自动化实例化与落盘生成脚本 (`tools/prepare_datasets.py`)。
+- [ ] **[端到端回归]** 测试验证数据结构正确：参考测试指南，编写并运行各类 `tests/integration/` 端到端防 OOM 与图元边界回归测试用例。
+- [ ] **[标注重构成]** 研发流式特征反写模块 (Serialization Dumper)：逐步支持分类属性、检测 BBox、分割 Polygon、关键点输出反向序列化流转，回写存入规范的 `CSUFeatureCollection` 对象中。
 
 ## Phase 2: 模型训练闭环引擎 - Trainer & Evaluator (预计: 5 days) 📋
 *目标：整合各 SOTA 视觉大模型引擎基类，配合论文实验全量跑通。*
