@@ -19,6 +19,79 @@
 - **(C) `cellstudio-web` (顶层可视化前端与前端工作站)**：前后端分离纯前端项目。包含科研数据看板、可拖拽流水线大屏以及带实时渲染反馈的高刷新率巨幅病理切片标注操作台。
   - **前端技术栈选型**：`Vue 3` + `TypeScript` + `Vite` (核心前端骨架与编译工具链), `TailwindCSS` (现代原子化 CSS 布局), `OpenSeadragon` (专门攻克 10 万像素级 WSI 无极缩放金字塔图层引擎), `ECharts` (医学统计全景图表), `WebSockets` (双工长连接以支撑 AI 辅助预打标的实时边渲染推送)。
 
+### 版本控制架构：Git Submodule 治理规范
+
+本项目采用 **Superproject + Submodule** 架构模式。父仓库 `CellStudio` 作为总指挥仓 (Superproject)，通过 Git Submodule 机制引用三个独立子仓库。每个子仓库拥有完全独立的 Git 历史、分支与版本号，父仓库则锁定各子模块到特定的 commit SHA 上，确保任何时刻 checkout 出来的整体系统都是配套可用的。
+
+**仓库拓扑**：
+```
+CellStudio/                    ← Superproject (父仓库)
+├── .gitmodules                ← Submodule 注册清单
+├── cellstudio-core/           ← Submodule → repos/cellstudio-core.git
+├── cellstudio-server/         ← Submodule → repos/cellstudio-server.git
+├── cellstudio-web/            ← Submodule → repos/cellstudio-web.git
+├── datasets/                  ← 数据资产 (不入版本管理)
+├── work_dirs/                 ← 训练产物 (不入版本管理)
+├── PROJECT_PLAN.md
+└── DEVELOPMENT_TASKS.md
+```
+
+#### (1) 分支命名规范 (Scoped Branching)
+所有功能分支必须携带模块作用域前缀，以便 Code Review 与 CI 时快速识别影响范围：
+- `core/feat-rdp-compress` — 算法层功能研发
+- `core/fix-resize-indexerror` — 算法层 Bug 修复
+- `server/feat-jwt-auth` — 服务端功能研发
+- `web/ui-wsi-canvas` — 前端界面研发
+- `global/refactor-udf-schema` — 横跨多个子仓库的全链路改动（在父仓库中操作）
+
+#### (2) 提交规范 (Conventional Commits)
+每次 `git commit` 强制遵循 `type(scope): description` 格式：
+- `feat(core): add MatchCache for computing feature IoU`
+- `fix(core): resolve bbox-label index mismatch in Resize transform`
+- `feat(server): implement async Celery task for WSI inference`
+- `refactor(global): migrate to submodule architecture`
+
+#### (3) 版本号与发布标签策略 (Tagging)
+采用**独立发版**策略，各子仓库维护自身语义化版本号：
+- `cellstudio-core` → Tag `core-v0.3.0`
+- `cellstudio-server` → Tag `server-v0.1.0`
+- `cellstudio-web` → Tag `web-v0.1.0`
+
+父仓库在里程碑节点合并时打统一系统版本 Tag（如 `v1.0.0`），锁定当时三个子模块的 SHA 快照。
+
+#### (4) 日常开发流程 (Workflow)
+```bash
+# 首次克隆（递归拉取所有子模块）
+git clone --recurse-submodules <repo-url>
+
+# 进入子模块独立开发
+cd cellstudio-core
+git checkout -b core/feat-new-metric
+# ... 编辑、提交 ...
+git push origin core/feat-new-metric
+
+# 回到父仓库，更新子模块指针
+cd ..
+git add cellstudio-core
+git commit -m "chore(global): bump cellstudio-core to latest"
+
+# 同步所有子模块到最新
+git submodule update --remote --merge
+```
+
+#### (5) CI/CD 路径触发规则 (Path Filtering)
+- 当 `cellstudio-core/**` 变动时 → 触发 PyTorch/CUDA 算法测试流水线
+- 当 `cellstudio-server/**` 变动时 → 触发 FastAPI 接口测试与 Docker 构建
+- 当 `cellstudio-web/**` 变动时 → 触发 Node.js/Vite 前端构建与部署
+
+#### (6) 迁移至远端 (GitHub/GitLab)
+当前子模块 remote 指向本地裸仓库 (`e:\workspace\AlchemyTech\repos\*.git`)。迁移到远端只需在各子仓库中执行：
+```bash
+git remote set-url origin https://github.com/AlchemyAITech/cellstudio-core.git
+git push -u origin master
+```
+父仓库的 `.gitmodules` 文件中的 URL 也需同步更新。
+
 ---
 
 ## 1. 基础数据模块：通用数据结构构建 (Data Foundation)
