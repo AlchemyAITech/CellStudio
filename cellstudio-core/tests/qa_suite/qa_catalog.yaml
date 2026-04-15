@@ -1,0 +1,50 @@
+# CellStudio QA System Model Catalog
+# The source of truth for all testing parameters and coverage tracking.
+models:
+  - id: cls_resnet50
+    config: "tests/integration/configs/tiny_cls_resnet50.yaml"
+    task: "classification"
+    metrics:
+      - "AccuracyEvaluator"
+    supports_vis: true
+    deploy_support: ["onnx"]
+
+  - id: cls_yolov8
+    config: "tests/integration/configs/tiny_cls_yolov8.yaml"
+    task: "classification"
+    metrics:
+      - "AccuracyEvaluator"
+    supports_vis: false
+    deploy_support: ["onnx", "tensorrt"]
+
+  - id: det_faster_rcnn
+    config: "tests/integration/configs/tiny_det_faster_rcnn.yaml"
+    task: "detection"
+    metrics:
+      - "COCOEvaluator"
+    supports_vis: true
+    deploy_support: ["onnx"]
+
+  - id: det_yolov8
+    config: "tests/integration/configs/tiny_det_yolov8.yaml"
+    task: "detection"
+    metrics:
+      - "COCOEvaluator"
+    supports_vis: false
+    deploy_support: ["onnx", "tensorrt"]
+
+  - id: seg_cellpose
+    config: "tests/integration/configs/tiny_seg_cellpose.yaml"
+    task: "segmentation"
+    metrics:
+      - "CellposeEvaluator"
+    supports_vis: true
+    deploy_support: ["onnx"]
+
+  - id: seg_yolov8
+    config: "tests/integration/configs/tiny_seg_yolov8.yaml"
+    task: "segmentation"
+    metrics:
+      - "COCOEvaluator"
+    supports_vis: false
+    deploy_support: ["onnx", "tensorrt"]

@@ -107,6 +107,18 @@ cd api && python main.py
 # GET  /status/{job_id}    — 查询任务状态
 ```
 
+### 调试与测试集构建
+
+框架内置了快速提取 tiny 数据集的工具，非常适合用于流水线连通性测试与快速 Dubug：
+
+```bash
+# 从完整数据集中提取 120/12/60 规模的极小分类/检测/分割数据集
+python tools/create_tiny_datasets.py
+
+# 验证测试集的完整性
+python sandbox/verify_tiny.py
+```
+
 ## 📖 文档
 
 完整 API 文档位于 `docs/` 目录，使用 MkDocs 构建：

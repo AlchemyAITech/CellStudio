@@ -1,0 +1,63 @@
+_base_:
+  - base_tiny_runtime.yaml
+
+task:
+  type: ClassificationTask
+
+model:
+  type: TimmClassifier
+  architecture: resnet50
+  loss:
+    type: CrossEntropyLoss
+    class_weights: [1.0, 1.0]
+  num_classes: 2
+  pretrained: true
+
+train_dataloader:
+  batch_size: 4
+  num_workers: 0
+  dataset:
+    type: UDFDataset
+    data_root: datasets/classfication/MIDOG_tiny
+    ann_file: udf_train.json
+    pipeline:
+      - type: LoadImageFromFile
+      - type: Resize
+        size: [224, 224]
+      - type: Normalize
+        mean: [123.675, 116.28, 103.53]
+        std: [58.395, 57.12, 57.375]
+      - type: PackCellStudioInputs
+        
+
+val_dataloader:
+  batch_size: 4
+  num_workers: 0
+  dataset:
+    type: UDFDataset
+    data_root: datasets/classfication/MIDOG_tiny
+    ann_file: udf_val.json
+    pipeline:
+      - type: LoadImageFromFile
+      - type: Resize
+        size: [224, 224]
+      - type: Normalize
+        mean: [123.675, 116.28, 103.53]
+        std: [58.395, 57.12, 57.375]
+      - type: PackCellStudioInputs
+        
+
+optim_wrapper:
+  optimizer:
+    type: AdamW
+    lr: 0.0001
+
+
+
+runner:
+  max_epochs: 8
+
+default_hooks:
+  checkpoint_hook:
+    interval: 100
+    save_best: null

@@ -68,25 +68,25 @@ venv.bak/
 *.swo
 
 # Project Specific (CellStudio)
-work_dirs/
-task/
+/work_dirs/
+/task/
 *kfold_train.log
 *.log
 *.pth
 *.pt
 *.onnx
 *.safetensors
-data/
-datasets/
-models/
-weights/
-checkpoints/
+/data/
+/datasets/
+/models/
+/weights/
+/checkpoints/
 logs/
-runs/
+/runs/
 tb_logs/
 wandb/
 results/
-outputs/
+/outputs/
 out/
 tmp/
 
@@ -113,9 +113,9 @@ tmp/
 # Debug & Sandbox
 debug_*/
 /debug/
-sandbox/
+/sandbox/
 
 # Build artifacts & caches
 *.egg-info/
 .ruff_cache/
-
+references/

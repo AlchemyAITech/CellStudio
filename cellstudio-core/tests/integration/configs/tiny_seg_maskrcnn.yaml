@@ -1,0 +1,50 @@
+_base_:
+- base_tiny_runtime.yaml
+task:
+  type: InstanceSegmentationTask
+model:
+  type: MMDetAdapter
+  config_file: configs/detect/mmdet_configs/faster-rcnn_r50_fpn_1x_coco.py
+  pretrained: ''
+  num_classes: 2
+train_dataloader:
+  batch_size: 2
+  num_workers: 0
+  dataset: &id001
+    type: UDFDataset
+    data_root: datasets/segmentation/cellpose_tiny
+    ann_file: udf_train.json
+    task_filter: cell
+    pipeline:
+    - type: LoadImageFromFile
+    - type: Resize
+      size:
+      - 512
+      - 512
+    - type: Normalize
+      mean:
+      - 0
+      - 0
+      - 0
+      std:
+      - 255.0
+      - 255.0
+      - 255.0
+    - type: PackCellStudioInputs
+val_dataloader:
+  batch_size: 2
+  num_workers: 0
+  dataset: *id001
+val_evaluator:
+  metrics:
+  - type: seg_miou
+  - type: seg_dice
+  - type: seg_hd95
+  - type: seg_pq
+  - type: seg_aji
+  - type: seg_all_metrics
+optim_wrapper:
+  optimizer:
+    type: AdamW
+    lr: 0.001
+

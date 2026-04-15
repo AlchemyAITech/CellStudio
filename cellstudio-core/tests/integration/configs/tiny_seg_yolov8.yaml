@@ -1,0 +1,47 @@
+_base_:
+  - base_tiny_runtime.yaml
+
+task:
+  type: InstanceSegmentationTask
+
+model:
+  type: UltralyticsSegAdapter
+  yaml_model: yolov8n-seg.pt
+  num_classes: 1
+
+train_dataloader:
+  batch_size: 4
+  num_workers: 0
+  dataset:
+    type: UDFDataset
+    data_root: datasets/segmentation/cellpose_tiny
+    ann_file: udf_train.json
+    task_filter: cell
+    pipeline:
+    - type: LoadImageFromFile
+    - type: Resize
+      size: [512, 512]
+    - type: PackCellStudioInputs
+
+val_dataloader:
+  batch_size: 4
+  num_workers: 0
+  dataset:
+    type: UDFDataset
+    data_root: datasets/segmentation/cellpose_tiny
+    ann_file: udf_val.json
+    task_filter: cell
+    pipeline:
+    - type: LoadImageFromFile
+    - type: Resize
+      size: [512, 512]
+    - type: PackCellStudioInputs
+
+val_evaluator:
+  metrics: [{'type': 'seg_miou'}, {'type': 'seg_dice'}, {'type': 'seg_hd95'}, {'type': 'seg_pq'}, {'type': 'seg_aji'}, {'type': 'seg_all_metrics'}]
+
+optim_wrapper:
+  optimizer:
+    type: AdamW
+    lr: 0.001
+

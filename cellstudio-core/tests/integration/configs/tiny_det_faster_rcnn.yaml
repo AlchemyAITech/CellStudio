@@ -1,0 +1,58 @@
+_base_:
+  - base_tiny_runtime.yaml
+
+img_size: [1024, 1024]
+
+task:
+  type: ObjectDetectionTask
+
+model:
+  type: MMDetAdapter
+  config_file: configs/detect/mmdet_configs/faster-rcnn_r50_fpn_1x_coco.py
+  pretrained: ''
+  num_classes: 2
+
+train_dataloader:
+  batch_size: 2
+  num_workers: 0
+  dataset:
+    type: UDFDataset
+    data_root: datasets/detection/MIDO_tiny
+    ann_file: udf_standard.json
+    task_filter: detection
+    pipeline:
+      - type: LoadImageFromFile
+      - type: Resize
+        size: ${img_size}
+      - type: Normalize
+        mean: [123.675, 116.28, 103.53]
+        std: [58.395, 57.12, 57.375]
+      - type: PackCellStudioInputs
+        
+
+val_dataloader:
+  batch_size: 2
+  num_workers: 0
+  dataset:
+    type: UDFDataset
+    data_root: datasets/detection/MIDO_tiny
+    ann_file: udf_standard.json
+    task_filter: detection
+    pipeline:
+      - type: LoadImageFromFile
+      - type: Resize
+        size: ${img_size}
+      - type: Normalize
+        mean: [123.675, 116.28, 103.53]
+        std: [58.395, 57.12, 57.375]
+      - type: PackCellStudioInputs
+        
+
+val_evaluator:
+  metrics: [{'type': 'det_map50'}, {'type': 'det_precision'}, {'type': 'det_recall'}, {'type': 'det_f1'}, {'type': 'det_count_error'}]
+
+optim_wrapper:
+  optimizer:
+    type: AdamW
+    lr: 0.001
+

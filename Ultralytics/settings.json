@@ -1,0 +1,21 @@
+{
+  "settings_version": "0.0.6",
+  "datasets_dir": "E:\\workspace\\AlchemyTech\\CellStudio\\datasets",
+  "weights_dir": "weights",
+  "runs_dir": "runs",
+  "uuid": "3a1ae76a65fcf1db7036cd8330c87bc25368d647b800d8bc9fd5d540f699a2fb",
+  "sync": true,
+  "api_key": "",
+  "openai_api_key": "",
+  "clearml": true,
+  "comet": true,
+  "dvc": true,
+  "hub": true,
+  "mlflow": true,
+  "neptune": true,
+  "raytune": true,
+  "tensorboard": false,
+  "wandb": false,
+  "vscode_msg": true,
+  "openvino_msg": true
+}
