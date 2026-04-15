@@ -40,14 +40,18 @@
 ## Phase 2: 模型训练闭环引擎 - Trainer & Evaluator (预计: 5 days) 📋
 *目标：整合各 SOTA 视觉大模型引擎基类，配合论文实验全量跑通。*
 
-### 2.1 模型适配器验证
-- [ ] Classification: 验证 `timm_adapter` 对 ResNet18/50, EfficientNet-B3/B4, ConvNeXt, MobileNetV3, ViT 的挂载。
-- [ ] Classification: 验证 `ultralytics_adapter` 对 YOLOv8-cls, YOLOv11-cls, YOLOv26-cls 的挂载。
-- [ ] Detection: 验证 `ultralytics_adapter` 对 YOLOv8-det, YOLOv26-det 的挂载。
-- [ ] Detection: 验证 `mmdet_adapter` 对 Faster R-CNN, DETR, FCOS, RTMDet, RetinaNet 的挂载。
-- [ ] Segmentation: 验证 `smp_adapter` 对 UNet, DeepLabV3+ 的挂载。
-- [ ] Segmentation: 验证 `ultralytics_seg_adapter` 对 YOLOv8-seg 的挂载。
-- [ ] Segmentation: 验证 `cellpose_adapter` 对 Cellpose, Cellpose-SAM 的挂载。
+### 2.1 模型适配器验证 (全网罗 19 SOTA 架构)
+- [ ] **Classification (6 个模型)**
+  - 验证 `timm_adapter` 对经典/前沿架构的挂载：`ResNet50`, `EfficientNet-B4`, `ConvNeXt-Tiny`, `ViT-Base`。
+  - 验证 `ultralytics_adapter` 对工业级分类架构的挂载：`YOLOv8m-cls`, `YOLOv26m-cls`。
+- [ ] **Detection (7 个模型)**
+  - 验证 `ultralytics_adapter` 对 One-Stage 架构的挂载：`YOLOv8m-det`, `YOLOv26m-det`。
+  - 验证 `mmdet_adapter` 对经典/Transformer 架构的挂载：`Faster R-CNN`, `FCOS`, `RTMDet-M`, `DETR`, `RetinaNet`。
+- [ ] **Segmentation (6 个模型)**
+  - 验证 `smp_adapter` 对医学常用结构的分割：`UNet` (ResNet34), `DeepLabV3+` (ResNet50)。
+  - 验证 `ultralytics_seg_adapter` 对工业级实例分割的挂载：`YOLOv8m-seg`。
+  - 验证 `cellpose_adapter` 对泛用细胞形态学流库的级联挂载：`Cellpose`, `Cellpose-SAM`。
+  - 验证 `mmdet_adapter` 对经典两阶段实例分割的挂载：`Mask R-CNN`。
 
 ### 2.2 Loss 体系补全
 - [ ] 分类 Loss：CrossEntropy, Label Smoothing CE, Focal Loss (for class imbalance)。
