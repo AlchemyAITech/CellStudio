@@ -1,9 +1,9 @@
 [submodule "cellstudio-core"]
 	path = cellstudio-core
-	url = e:\\workspace\\AlchemyTech\\repos\\cellstudio-core.git
+	url = https://github.com/AlchemyAITech/cellstudio-core.git
 [submodule "cellstudio-server"]
 	path = cellstudio-server
-	url = e:\\workspace\\AlchemyTech\\repos\\cellstudio-server.git
+	url = https://github.com/AlchemyAITech/cellstudio-server.git
 [submodule "cellstudio-web"]
 	path = cellstudio-web
-	url = e:\\workspace\\AlchemyTech\\repos\\cellstudio-web.git
+	url = https://github.com/AlchemyAITech/cellstudio-web.git
