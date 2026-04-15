@@ -36,9 +36,18 @@
 - [ ] **极限坐标算子测试**：传入极小重叠、完全包含、十字交叉等极端几何拓扑，验证 `compute_udf_iou` 在 BBox 与 Polygon 体系下的精确数值。
 - [ ] **ID 挂载逻辑**：当 `IoU > thresh` 时，确保算法生成的图元正确外键绑定 `match_info` 字典。
 
-### 2.3 WSI 切图与增强流引擎 (WSI & Data Pipeline)
-- [ ] **图像域桥接**：在同一代码管线下，随机分发 `.svs` (基于 `OpenSlide`) 和巨幅原生 `.tiff` (基于 `TiffFile`)，验证 `Dataset` 是否能做到上层无感化滑窗提取 (Slide Window Extraction)。
-- [ ] **安全的数据增强（Data Augmentation）边界**：开启弹性形变 (`ElasticTransform`)、旋转错位等，确认多边形映射或边缘切割坐标不会像之前的 `visual_aug.py` 抛出 `IndexError` 溢出。
+### 2.3 数据加载器 (DataLoader) 输出的可视化验证
+针对 JSON 的抽象结构，必须开发专用的探针脚本对内存张量进行即时可视化，确保“所读即真理”。
+- [ ] **基础张量还原绘图**：编写基于 `matplotlib` / `OpenCV` 的渲染探针，提取 PyTorch DataLoader 的每个 Batch，将 `img` 逆归一化回 8-bit RGB 图像，并将伴随的 `gt_bboxes` 或 `gt_masks` 作为 Overlay 图形覆盖绘制。
+- [ ] **UDF 字典一致性可视化**：人工比对：直接加载 `udf_train.json`，抽取其中复杂的细胞多边形对象，在原图上用红线渲染；然后使用 DataLoader 提取同一区域的特征，用绿线叠加，**红绿线必须实现 100% 像素级吻合**，确保解析域未因舍入误差漂移。
+
+### 2.4 WSI 切图与数据增强引擎 (WSI & Data Augmentations) 可视化打靶
+不仅保证代码不报错，更保证变换空间里的代数几何转换具有视觉合法性。
+- [ ] **WSI 滑窗图像域连通拼接**：对 `.svs` (基于 `OpenSlide`) 和巨幅原生 `.tiff` 进行大图按步长 (`stride`) 裁切导出后，编写一个拼图脚将切片重新贴图，通过肉眼检查在接缝处（Seams）是否出现特征断裂或像素位移跳变。
+- [ ] **增强策略 (Augmentation) 极端扰动全量可视化**：开发专属的预处理渲染比较工具 (`tools/debug_visual_aug.py`)：
+  - 强制启动弹性形变 (`ElasticTransform`)、旋转错位。
+  - 同屏输出并排的 `Source Image (含标注)` 与 `Augmented Image (含变换后的标注)`。
+  - **核心验证**：多边形映射或边缘切割坐标不会抛出异常（如之前的 IndexError），并且变换后的 BBox 与 Mask **严格紧贴**发生几何扭曲后的前景色病灶细胞边缘，不存在因像素位移计算错误引发的脱靶现象。
 
 ---
 
