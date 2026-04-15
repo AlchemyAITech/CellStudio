@@ -24,6 +24,8 @@
 *目标：打通高自由度的"图形基类"与"UDF去中心化极简存储"。*
 - [x] 实现并重构基础图元类（`CSUPoint`, `CSUBBox`, `CSUPolygon`, `CSUMask`, `CSULabel`）。
 - [x] 完成 "Total-Part" 的 UDF JSON 去中心化加载拆分（解决大 JSON 爆内存问题）。
+- [ ] **[图元升级]** 实现特征的 `Hierarchy Tree (层级树)` 嵌套关联算法结构，抛弃扁平数组结构。
+- [ ] **[坐标强管]** 底层坐标强制统一切向 Level-0（最高物理辨识率坐标集），剥除因缩放比例引入的运算误差。
 - [x] 实现 RDP (`shapely.simplify`) 算法多边形瘦身存储。
 - [x] 为 `CSUProperties` 增加 `source_type` (human/algorithm) 与 `match_info` 字段。
 - [x] 构建相似度匹配引擎 `MatchCache` (`compute_udf_iou`) 并可视化验证。
@@ -35,11 +37,12 @@
   - **[病理专属变换]** 实现并验证 `PathologyRotateExpand`：支持在切块旋转时进行外延扩展防止边角黑边，兼容常规裁剪。
   - 强制启动大尺度空间扭曲 (`ElasticTransform` / 旋转偏移等)，肉眼并排查验多边形是否发生脱靶、越界报错。
 - [ ] 各类型 WSI 超大图读取引擎桥接（`OpenSlide`/`TiffFile`）。
+  - **[抽象请求令牌]** 设计 `CSURegionRequest`，独立于各类解析引擎之上封装 `(x,y,w,h,mpp)` 结构体。
   - **[瓦块与 MPP 映射]** 研发瓦块按需切图抽取支持 (Tile Slicing)，并严格强制挂载 **Target MPP (固定物理分辨率)** 缩放过滤。
   - **[拼缝验证]** 滑窗连通性（Seams）拼图查验，确保按照指定 Overlap 切割与重组无特征断裂。
 - [ ] **[数据脚本]** 构建全类型测试数据，按照最新的 UDF JSON 数据结构规范实现数据集自动化实例化与落盘生成脚本 (`tools/prepare_datasets.py`)。
 - [ ] **[端到端回归]** 测试验证数据结构正确：参考测试指南，编写并运行各类 `tests/integration/` 端到端防 OOM 与图元边界回归测试用例。
-- [ ] **[标注重构成]** 研发流式特征反写模块 (Serialization Dumper)：逐步支持分类属性、检测 BBox、分割 Polygon、关键点输出反向序列化流转，回写存入规范的 `CSUFeatureCollection` 对象中。
+- [ ] **[标注重构成]** 研发流式特征反写模块 (Serialization Dumper)：逐步支持分类属性、检测 BBox、分割 Polygon、关键点输出反向序列化流转，回写存入包含 Hierarchy 结构的 `CSUFeatureCollection` 对象中。
 
 ## Phase 2: 模型训练闭环引擎 - Trainer & Evaluator (预计: 5 days) 📋
 *目标：整合各 SOTA 视觉大模型引擎基类，配合论文实验全量跑通。*
@@ -87,9 +90,9 @@
 *目标：实现端到端的长链预测与大图超分辨率拆解拼合。*
 - [ ] 编写 `BaseInferencer` 基类与单图前向方法。
 - [ ] 实现核心超大 WSI 切图预测与后处理合并重构。
-  - 基本框架：`sliding_window_inference` 预处理。
-  - **[新增] 检测特征多级融合**：实现并测试针对跨瓦块边界重叠框的提取重组与 **全局 Non-Maximum Suppression (NMS) / Soft-NMS 去重算法**。
-- [ ] 将 Tensor 结果强制反向序列化挂载回 `CSUFeatureCollection`，计算归一化 MPP 输出。
+  - 基本框架：`sliding_window_inference` (携带 `Margin` 冗余扩展填充)。
+  - **[新增] 切片去重 (Centroid Resolution)**：放弃低效全局 NMS，实现基于几何中心点的越界过滤。凡是特征形心落入扩展 Margin 区的检测对象一律静默舍弃。
+- [ ] 将 Tensor 结果强制反向序列化挂载回带层级关系树 (Hierarchy) 的 `CSUFeatureCollection`，计算归一化 MPP 输出。
 - [ ] 推理热力图 (Heatmap) / 特征重投影绘制输出引擎构建。
 - [ ] 封装独立测试 `tools/test.py`。
 

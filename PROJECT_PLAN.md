@@ -95,34 +95,27 @@ git push -u origin master
 ---
 
 ## 1. 基础数据模块：通用数据结构构建 (Data Foundation)
-- **(0) 统一底层空间图元数据基类 (Primitive Data Structures)**：摒弃以“任务（分类/检测/分割）”为导向的固化架构。底层仅抽象实现各类纯粹的基础空间与属性类型（如 `CSUPoint`, `CSUBBox`, `CSUPolygon`, `CSUMask`, `CSULabel`）。将各类任务的输出结果回归到这些基本图元的组合上进行装配适配，从而做到真正的底层模块化与高自由度。
-- **(1) 模型训练用标注数据结构（人工数据）**：依托上述图元组件构建的真值集合（标识 `source_type='human'`），负责流转业务专家产生的数据图元。
-- **(2) 模型推理用数据结构（算法数据）**：依托上述图元组件对模型推理结果进行强制映射（标识 `source_type='algorithm'`），无论多么复杂的下游任务输出，最终都降维转换为以上标准图元类型的组合输出。
-- **(3)** 支持算法数据和人工数据的相似度匹配，对于匹配上的算法数据，加上人工标注的 ID 标识，并记录相似度。
-  - *工程落实*：在底层增加 `MatchCache` 工具，提供 `compute_udf_iou(pred_feature, gt_feature)` 接口，当 `IoU > thresh` 时映射 ID 作为外键保存，并留出 `confidence` 和 `match_metric` 属性（该部分剥离为通用库 `cellstudio/utils/match.py`，供未来前后端预打标复用修正）。
-- **(4) 超大基质提取与物理单位归一 (WSI / MPP Reading)**：封装底层滑窗与金字塔层级引擎（接入 `OpenSlide` / `TiffFile` API），**原生支持瓦块切片 (Tile Slicing)**。彻底解决病理金字塔图像无法直接入显存的问题。同时，建立**统一 MPP (Microns Per Pixel)** 读取基准：底层在切图和读取时，必须解析文件自带的物理分辨率/微米级缩放率，把不同扫描仪、不同放大倍率摄取的图像强制采样到指定的目标 MPP，保证模型看到的物理细胞尺寸始终一致。
-- **(5) 专属病理数据增广 (Pathology-Aware Augmentations)**：在 Pipeline 层实现可配拔插的 Transforms 函数链 (`Resize`, `RandomFlip`, 色彩偏移等)。此外，专门开发病理大图特供的**延展旋转 (Topology Expand Rotation)** ——在旋转切块时并非用黑边去补足三角形空缺，而是通过计算扩展边界外延后执行旋转裁剪，最大程度保持切面连贯性；且该模块要向下降级完全兼容普遍的常规旋转 (Conventional Rotate)。
-- **(6)** 构建全类型测试数据，并按照当前设计的 JSON 数据结构实现数据集自动化实例化存储脚本。
-- **(7)** 测试验证数据结构正确：编写并运行各类 `tests/integration` 端到端回归测试用例。
-- **(8)** 逐步支持各类型数据（分类框、实例分割多边形、关键点等）流式特征标注反写模块。
+汲取 QuPath 架构的成功经验，对纯医学大图引擎底座进行全面升维：
+- **(0) 统一底层空间图元数据基类 (Primitive Data Structures)**：摒弃以“任务”为导向的固化架构。底层抽象实现 `CSUPoint`, `CSUBBox`, `CSUPolygon`, `CSUMask`, `CSULabel`。
+- **(1) 引入对象层级森林架构 (Annotation Hierarchy Tree)**：在 `CSUFeatureCollection` 中引入“父-子”继承能力体系（如：肿瘤区域 `Parent` 嵌套几十万个细胞 `Children`，细胞嵌套 `Nucleus`）。不再使用扁平数组，所有图元能依据几何拓扑归宿层级关系树。
+- **(2) 强制 Level-0 原生物理坐标系 (Resolution-Independent Coordinates)**：无论前端渲染或 DataLoader 从何种 MPP 倍率（Level 2/3）提取特征流，落盘、反显存的数据结构标量信息全部基于全景 WSI 的**最高分辨倍率层 (Level 0)** 进行统一，消除四舍五入引发的拓扑越界或撕裂误差。
+- **(3) 模型特写数据属性**：区分 `source_type='human'` 与 `algorithm`，并依托 `MatchCache` 工具计算 `compute_udf_iou` 完成打桩式外键绑定合并。
+- **(4) 空间请求隔离层 (Region Request Abstract)**：参考 QuPath，将大图抽象出单独的 `CSURegionRequest(x, y, w, h, target_mpp)` 结构，作为统一对 `OpenSlide` / `TiffFile` 进行瓦块获取的标准令牌，解耦具体的底层加载器引擎差异。
+- **(5) 专属病理数据增广 (Pathology-Aware Transforms)**：包含向下延展旋转 (Topology Expand Rotation) 在内的大尺度病理特征保留型仿射变换。
+- **(6) UDF JSON 级实例化生成**：完成并验证各类数据切离落地生成任务。
+- **(7) 测试端到端集成**：依靠 Architecture 测试规范拉爆边界限流。
+- **(8) 流式反向写回存储**：`Serialization Dumper` 实现内存图素反构落地存放。
 
 ## 2. 通用模型训练/验证构建 (Trainer & Evaluator)
-- **(1)** 按架构树顺序逐步开发基类支持：图像分类 (`cls`)、目标检测 (`det`)、图像分割 (`seg`)、多属性学习、MIL (多实例)、反卷积重建、回归预测、非监督聚类、空间分析、Zero-shot/Few-shot 推演等。
-- **(2)** 构建对应算法的各类模型工厂 (Model Registry)：
-  - 支持将算法拓扑与执行参数独立保存（剥离为高内聚 `yaml` 或 `json`），以便后续前后端 API 能以反序列化的途径直接将模型转置为可视化配置表单。
-  - 对于类型相同/跨任务的 Common Args（如 `lr`, `batch_size`, `optimizer`）做抽象合并。
-- **(3)** 针对每个模型任务池，自动化产出或构建独立的、验证模型连通性的极限微缩测试集 (Tiny-sets)。
-- **(4)** 构建全量训练模型的评价指标组件 (`metrics`)：代码层面完整实现如 Dice, HD95, mIoU, AP 等函数，支持 `Config` 层动态控制需要统计输出哪些指标计算器。
-- **(5)** 构建训练用 CLI (`tools/train.py`)、并针对 Python 后端导出对应的 `train_api(...)` 编程黑盒接口。
-- **(6)** 训练调试系统搭建与可视化流控：中间数据存储输出 (通过 `dump_hooks`)，包括全流程对齐如原始 Image、前置 Image+Label 覆盖掩膜图、Loss 数学曲线日志输出系统。
-- **(7)** 全类型模型回归遍历：将 (1) 中涵盖的所有单一算法引擎，进行统一的自动化单元通过测试。
+*(略...见内部任务清单详配)*
 
 ## 3. 通用模型测试/推理 (Inferencer)
 - **(1) 基础可编程推理接口 (`BaseInferencer`)**：支持底层直接挂载单张图像 `predict_image()` 和 批量图像流 `predict_batch()` 的逻辑引擎。
-- **(2) WSI 超大图推理拼接与结果融合 (Detection/Segmentation Fusion)**：
-  - 实现程序滑窗切块 (`sliding_window_inference`) 预处理，设定固定 Overlap (步长与切片重叠区间)。
-  - **检测框融合机制**：执行推理后，强制收集全局切片边界内的所有边框绝对坐标。通过 **NMS（非极大值抑制）与 Soft-NMS** 对跨界拼缝处重叠输出的重叠特征进行合并剔除，完成病理全图无缝拼接重构。
-- **(3) 输出规范化处理**：推理输出结果对象化，把零散 Tensor 强制序列化清洗，输出回统一的 `CSUFeatureCollection` 结构。
+- **(2) WSI 超大图推理拼接与极致结果融合 (Centroid-Based Fusion)**：
+  - 汲取业界顶尖流控，放弃拖慢百万级细胞性能的全图 NMS 策略。
+  - **Overlapping Padding 裁取**：在提取每个 `W × H` 的瓦块进行预测时，向外冗余扩大 `M`（Margin）像素交给网络，规避切割带来的细胞残缺。
+  - **形心排他判定 (Centroid Resolution)**：收集所有特征框/切面，**计算图元形心**。只有该图元的形心严格属于这块切片的 `W × H` 核心原生区域时，结果才被录入树结构。掉入延伸出来的 `M` 区域边缘的重复检测一律静默丢弃，天然防重复。
+- **(3) 输出规范化处理**：推理输出结果对象化，重新映射转入带 Hierarchy 的 `CSUFeatureCollection` 结构。
 - **(4) 推理引擎工具与可配层**：实现支持输出分类热力图表现 (`heatmap`)，及掩码覆盖混合层渲染器。
 - **(5) 构建测试用 CLI/API**：如 `tools/test.py` 及后端开放的 `FastAPI` 预留接口（如 `/api/v1/models/{id}/predict`），能够同时应对轻量图回调与大图异步任务结果下放的逻辑流转。
 
