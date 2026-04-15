@@ -75,10 +75,14 @@
 ### 3.1 实验环境设定
 | 项目 | 配置 |
 |---|---|
-| 操作系统 | Windows 11 / Linux Ubuntu 22.04 兼容构建 |
-| GPU | NVIDIA RTX 4090 24GB / A100 (CUDA 自动加速) |
-| 深度学习框架 | PyTorch >= 2.0.0 |
-| Python 版本 | 3.11 |
+| 操作系统 | Microsoft Windows 11 专业版 |
+| CPU | Intel Core i9-12900H (14 核 20 线程) |
+| 内存 | 32 GB DDR5 |
+| GPU | NVIDIA GeForce RTX 3080 Ti Laptop GPU (16 GB VRAM) |
+| GPU 驱动 | 555.97 |
+| CUDA 版本 | 12.1 |
+| 深度学习框架 | PyTorch 2.5.1+cu121 |
+| Python 版本 | 3.11.13 |
 | 实验管理框架 | CellStudio v0.2.0 |
 
 ### 3.2 训练超参数统一配置 (Hyperparameters)

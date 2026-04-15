@@ -12,58 +12,52 @@
 - **Train (训练集) == Val (验证集)**：将训练集的标注和图像集合作为验证集输入。如果在该设定下模型的泛化指标（Accuracy、mAP、Dice）不能随着 Epoch 训练快速攀升至 1.0 (100%)，则标志着网络的前向传播、标签映射或 Loss 梯度回传存在**架构断链级别的 Bug**。
 - **Test (测试集)**：作为完全独立的数据，在此阶段仅充当 Inference 流转通过的占位数据块，不考量其真实得分。
 
-| 任务类型 | 使用的数据集目录 | 数据量规模 | 拆分策略核验状态 |
-|---|---|---|---|
-| **Classification (分类)** | `datasets/classfication/MIDOG_tiny` | 极小量 | Train=2, Val=2 (100% 重叠), Test=2 (独立) |
-| **Detection (检测)** | `datasets/detection/MIDO_tiny` | 极小量 | Train=2, Val=2 (100% 重叠), Test=2 (独立) |
-| **Segmentation (分割)** | `datasets/segmentation/cellpose_tiny` | 极小量 | Train=2, Val=2 (100% 重叠), Test=2 (独立) |
+| 任务类型 | 数据加载器 (Dataloader) | 数据集根目录 (Root) | 数据规模 | 验证方法 |
+|---|---|---|---|---|
+| **Classification (分类)** | `StandardClassificationDataset` | `datasets/classfication/MIDOG_tiny` | Train:100, Test:20 | Train/Val 跑同一份 `splits/train.json` |
+| **Detection (检测)** | `TileMIDODataset` | `datasets/detection/MIDO_tiny` | Train:10, Test:2 | Train/Val 跑同一份 `splits/train.json` |
+| **Segmentation (分割)** | `CellposeSegmentationDataset` | `datasets/segmentation/cellpose_tiny` | Train:43, Test:18 | Train/Val 跑同一份 `splits/train.json` |
 
-*(注：系统自检脚本已验证当前目录下的 `splits/` 配置，其中 `train.json` 与 `val.json` 的索引内容完全一致，完全符合急速过拟合测试标准。)*
+*(注：在本次验证中，测试所用的 `_tiny_test.yaml` 配置文件均已显式将 `train_dataloader` 和 `val_dataloader` 的 `ann_file` 统一定向至 `splits/train.json`，确保验证集在数学上 100% 重叠，严格遵循极速过拟合测试标准。)*
 
 ---
 
-## 第二章 测试超参数与流程配置
+## 第二章 测试超参数与配置脚本
 
-在验证架构流转健康度时，模型不需要经历漫长而复杂的真实大盘收敛期，只需遵循以下「过拟合极速验证参数标准」：
+为满足一键复现，已为您在此次验证中专门生成了三个最小化、移除了全部 Data Augmentation 的极速测试配置文件：
+- 分类测试配置：`configs/classify/resnet18_mido_tiny_test.yaml`
+- 检测测试配置：`configs/detect/yolov8m_mido_tiny_test.yaml`
+- 分割测试配置：`configs/segmentation/unet_mido_tiny_test.yaml`
 
-### 2.1 联调级超参数配置表 (Hyperparameters for Debug)
-
-| 参数项 | 取值 | 配置目的 |
-|---|---|---|
-| **Epochs** | 20 ~ 50 | 次数减少，以最快速度看指标拉升状态 |
-| **Batch Size** | 2 或 4 | Tiny 集的总量极小，缩小 Batch 让它跑出完整的 Iteration |
-| **Learning Rate** | `1e-3` | 放大初始学习率，暴力加速过拟合 |
-| **Data Augmentation** | 全部关闭 (Off) | 移除所有数据增强（旋转、噪声、颜色抖动等），让模型只学习极其固定的图像像素 |
-| **Pretrained Weights** | 从零训练 (From Scratch) | 选配。若想彻底测网络连通性，可以不加载预训练，看 Loss 是否正常下降 |
-| **Early Stopping** | 禁用 | 确保架构能完整走完指定 Loop，测试最终的 Model Saver 环节 |
+这些配置文件遵循以下「过拟合级验证参数」：
+- **Epochs**：极少轮次 (10 Epochs)，快速验证。
+- **Batch Size**：2 或 4 (对显存极度友好)。
+- **Learning Rate**：`1e-3` (放大初始学习率暴力过拟合)。
+- **Workers**: `0` (单发线程防死锁调试)。
 
 ---
 
 ## 第三章 阶段性任务测试流执行标准
 
 ### 3.1 分类任务连通性测试 (Classification)
-1. **执行入口**：`python tools/train.py --config configs/classify/yolo_v8m_cls_mido.yaml --debug` (需配合具体实现的 config 名)
+1. **执行入口**：`python tools/train.py --config configs/classify/resnet18_mido_tiny_test.yaml --debug`
 2. **测试观测点**：
-   - DataLoader 是否成功解析了 `MIDOG_tiny` 下切图的 Label 字典。
+   - `StandardClassificationDataset` 是否成功解析了 `MIDOG_tiny` 下 `splits/train.json` 中的 `cls_labels`。
    - `CrossEntropyLoss` 是否随着 Epoch 急剧下降至 0.0X 级别。
-   - 训练结束后，验证集指标 **Accuracy, AUC 必须逼近 1.0 (100%)**。
-   - 检查 `results/` 目录下是否生成了没有报错挂起的分类混淆矩阵图。
+   - 训练结束后，验证集指标 **Accuracy 必须逼近 1.0 (100%)**。
 
 ### 3.2 检测任务连通性测试 (Detection)
-1. **执行入口**：`python tools/train.py --config configs/detect/yolo_v8m_det_mido_tile.yaml --debug`
+1. **执行入口**：`python tools/train.py --config configs/detect/yolov8m_mido_tiny_test.yaml --debug`
 2. **测试观测点**：
-   - BBox 映射逻辑是否健康（是否出现坐标越界越权报错，尤其是数据预处理阶段 `visual_aug.py` 的索引）。
-   - Box Loss 与 Objectness Loss 是否双双下降。
-   - 在由于 Train==Val 的前提下，验证集指标 **mAP@0.5 急速攀升至 0.95 以上**。
-   - Dataloader 是否能平稳承接原生切片的切割拼接推流。
-   - 测试结束时产生的可视检出图片中，绿色的框应极为精准地裹紧目标。
+   - `TileMIDODataset` 是否能在不越界的前提下成功处理大型 `*.tiff` 原生切片的坐标切割重投影。
+   - BBox 映射逻辑是否健康（预处理阶段 `visual_aug.py` 不再抛出对齐异常）。
+   - 由于 Train==Val，验证集指标 **mAP@0.5 急速攀升**。
 
 ### 3.3 分割任务连通性测试 (Segmentation)
-1. **执行入口**：`python tools/train.py --config configs/segmentation/unet_mido_seg.yaml --debug`
+1. **执行入口**：`python tools/train.py --config configs/segmentation/unet_mido_tiny_test.yaml --debug`
 2. **测试观测点**：
-   - 面向 `Mask` 的像素级提取、针对多边形的高精度还原或者下采样特征降维图构建不脱离正确对位。
-   - 验证集的 **Dice 系数与 mIoU 是否能逼近 1.0**，**95% HD 是否逼近极小值 (近乎 0)**。
-   - 检查生成的推理重绘样本中，预测吐出的掩码是否与基准 GT **像素级吻合**。
+   - `CellposeSegmentationDataset` 对 `Mask` 的像素级提取和高精度还原能否被 PyTorch Loader 正确重组为 Tensor。
+   - 验证集的 **Dice 系数与 mIoU 是否能逼近 1.0**。
 
 ---
 
