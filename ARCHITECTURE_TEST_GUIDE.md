@@ -13,15 +13,36 @@
 验证原则为：在 Tiny 特供验证集上，不考虑泛化能力，若验证通过，**所有模型的首要泛化核心指标（如 Accuracy、mAP、Dice）必须能随着 Epoch 的推进而平滑逼近 1.0 (100%)**。
 
 ### 1.1 微缩数据集矩阵配置 (Dataset Matrix)
-| 分析任务 | Dataloader 引擎 | 测试根目录 (Root) | 数据集规模 (含分布) | 联调验证基准 |
+| 分析任务 | Dataloader 引擎 | 测试根目录 (Root) | 数据规模 | 验证方法 |
 |---|---|---|---|---|
-| **分类 (Cls)** | `StandardClassificationDataset` | `classfication/MIDOG_tiny` | Train:100 / Val:100 / Test:20 | Train/Val 指定同一份 `splits/train.json` |
-| **检测 (Det)** | `TileMIDODataset` | `detection/MIDO_tiny` | Train:10 / Val:10 / Test:2 | Train/Val 指定同一份 `splits/train.json` |
-| **分割 (Seg)** | `CellposeSegmentationDataset`<br>`UDFDataset` | `segmentation/cellpose_tiny` | Train:43 / Val:43 / Test:18 | Train/Val 指定同一份 `splits/train.json` |
+| **分类 (Cls)** | `StandardClassificationDataset` | `datasets/classfication/MIDOG_tiny` | Train:100, Test:20 | Train/Val 跑同一份 `splits/train.json` |
+| **检测 (Det)** | `TileMIDODataset` | `datasets/detection/MIDO_tiny` | Train:10, Test:2 | Train/Val 跑同一份 `splits/train.json` |
+| **分割 (Seg)** | `CellposeSegmentationDataset` | `datasets/segmentation/cellpose_tiny` | Train:43, Test:18 | Train/Val 跑同一份 `splits/train.json` |
 
 ---
 
-## 第二章 全维度模型适配器测试流 (Adapter Validation)
+## 第二章 基础数据栈与图元结构测试流 (Data Foundation Testing)
+
+在模型真正前向传播前，必须对底层的 UDF (Universal Data Format) 和图形基元进行严酷的单元测试与张量边界测试。这是整个架构不崩溃的基石。
+
+### 2.1 基础图元实体边界测试 (Primitive Graph Objects)
+确保脱离了模型本身的基类具有极强的自校验与反序列化解析能力。
+- [ ] **空间基元拉伸**：对 `CSUPoint`, `CSUBBox`, `CSUPolygon`, `CSUMask` 强制输入非法值（如越界负数、塌缩的零面积框），验证系统抛出的防护级别而非静默报错。
+- [ ] **UDF JSON 脱水测试**：测试解析体积达到 GB 级的伪造 JSON（模拟多张带有 10 万+细胞的多边形 `Total-Part` 拆分文件），必须满足**内存平缓且无 OOM 卡死**。
+- [ ] **多边形 RDP 瘦身压缩率**：针对复杂边缘细胞生成的 `CSUPolygon`，运行 `shapely.simplify`，要求边缘还原度保真（视觉偏移 < 1 个像素级）的同时，点位数组压缩率达到 60% 以上。
+
+### 2.2 相似度与缓存匹配引擎 (MatchCache & IOU)
+验证从“算法预测数据 (`source_type='algorithm'`)” 向 “人工金标准 (`source_type='human'`)” 发起匹配合并的核心机制。
+- [ ] **极限坐标算子测试**：传入极小重叠、完全包含、十字交叉等极端几何拓扑，验证 `compute_udf_iou` 在 BBox 与 Polygon 体系下的精确数值。
+- [ ] **ID 挂载逻辑**：当 `IoU > thresh` 时，确保算法生成的图元正确外键绑定 `match_info` 字典。
+
+### 2.3 WSI 切图与增强流引擎 (WSI & Data Pipeline)
+- [ ] **图像域桥接**：在同一代码管线下，随机分发 `.svs` (基于 `OpenSlide`) 和巨幅原生 `.tiff` (基于 `TiffFile`)，验证 `Dataset` 是否能做到上层无感化滑窗提取 (Slide Window Extraction)。
+- [ ] **安全的数据增强（Data Augmentation）边界**：开启弹性形变 (`ElasticTransform`)、旋转错位等，确认多边形映射或边缘切割坐标不会像之前的 `visual_aug.py` 抛出 `IndexError` 溢出。
+
+---
+
+## 第三章 全维度模型适配器测试流 (Adapter Validation)
 
 本测试流旨在彻底验证 19 套模型是否能在 CellStudio 系统内顺畅无阻地被实例化、输入特征切片、正确反向传递并在最后完成 Checkpoints 权重落盘。
 
