@@ -29,7 +29,13 @@
 - [x] 构建相似度匹配引擎 `MatchCache` (`compute_udf_iou`) 并可视化验证。
 - [x] **(✅ 已修复)** 解决 `visual_aug.py` 中 `IndexError` (因 Augmentation 裁剪造成的 bbox 与 label 索引偏移错位)。
 - [ ] 完善 `UDFDataset` 及统一的 Dataloader 读取流验证（对三种任务类型跑通端到端 DataLoader 迭代）。
+  - **[新增]** 构建基础张量还原绘图探针：提取 DataLoader Batch，逆归一化并叠绘 BBox/Mask。
+  - **[新增]** UDF字典一致性可视化：实现 JSON 原始解析（红线）与 Dataloader 提取流（绿线）的 100% 同屏像素对齐校验。
+- [ ] 构建数据增广 (Data Augmentations) 可视化打靶引擎 (`tools/debug_visual_aug.py`)。
+  - 强制启动大尺度空间扭曲 (`ElasticTransform` / 旋转偏移等)。
+  - 并排比较 Source Image 与 Augmented Image，彻底用肉眼排查因像 `IndexError` 类矩阵越界或漂移导致标注“脱靶”的多边形漏洞。
 - [ ] 各类型 WSI 读取引擎桥接（`OpenSlide`/`TiffFile`）。
+  - **[新增]** 滑窗连通性（Seams）拼图可视化查验，确保切割与重组无特征断裂。
 
 ## Phase 2: 模型训练闭环引擎 - Trainer & Evaluator (预计: 5 days) 📋
 *目标：整合各 SOTA 视觉大模型引擎基类，配合论文实验全量跑通。*
